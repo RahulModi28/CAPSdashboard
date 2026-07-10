@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { 
-  Search, Users, Building2, DoorOpen, Heart, X, 
-  LayoutDashboard, Calendar, Settings, 
-  LogOut, Plus, ChevronRight, CheckCircle2, MoreVertical,
-  Key, KeyRound, TrendingUp, Mail, Clock, AlertCircle, Send
+  Search, Users, Building2, DoorOpen, X, 
+  LayoutDashboard, Settings, 
+  Plus, ChevronRight, CheckCircle2, MoreVertical,
+  Key, KeyRound, Mail, Clock, AlertCircle, Send
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
