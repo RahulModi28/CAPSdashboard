@@ -44,9 +44,9 @@ export default function App() {
     const failed = emailsList.filter(e => e.status === "failed").length;
     
     return [
-      { name: 'Sent', value: sent, color: '#10b981' }, 
-      { name: 'Pending & Scheduled', value: pending, color: '#f59e0b' },
-      { name: 'Failed', value: failed, color: '#ef4444' },
+      { name: 'Sent', value: sent, color: '#34a076' }, 
+      { name: 'Pending & Scheduled', value: pending, color: '#d69e38' },
+      { name: 'Failed', value: failed, color: '#d95858' },
     ].filter(d => d.value > 0);
   }, [emailsList]);
 
@@ -709,10 +709,10 @@ export default function App() {
               {/* ── ROW 1: KPI Cards ── */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: 'Total Emails', value: emailStats.total, color: '#a78bfa', icon: Mail },
-                  { label: 'Successfully Sent', value: emailStats.sent, color: '#10b981', icon: CheckCircle2 },
-                  { label: 'Pending / Queued', value: emailStats.pending + emailStats.scheduled, color: '#f59e0b', icon: Clock },
-                  { label: 'Failed', value: emailStats.failed, color: '#ef4444', icon: AlertCircle },
+                  { label: 'Total Emails', value: emailStats.total, color: '#9482c9', icon: Mail },
+                  { label: 'Successfully Sent', value: emailStats.sent, color: '#34a076', icon: CheckCircle2 },
+                  { label: 'Pending / Queued', value: emailStats.pending + emailStats.scheduled, color: '#d69e38', icon: Clock },
+                  { label: 'Failed', value: emailStats.failed, color: '#d95858', icon: AlertCircle },
                 ].map(({ label, value, color, icon: Icon }) => (
                   <div key={label} className="glass-panel rounded-2xl p-5 text-white">
                     <div className="flex justify-between items-start mb-3">
@@ -746,7 +746,7 @@ export default function App() {
                             contentStyle={{ background: 'rgba(30,31,43,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white' }}
                             cursor={false}
                           />
-                          <Bar dataKey="emails" fill="#a78bfa" radius={[4,4,0,0]} />
+                          <Bar dataKey="emails" fill="#9482c9" radius={[4,4,0,0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
