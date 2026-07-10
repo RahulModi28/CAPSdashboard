@@ -221,7 +221,7 @@ export default function App() {
                   <span className="font-medium text-foreground">{stats.rooms}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Partnerships</span>
+                  <span>Roommates</span>
                   <span className="font-medium text-foreground">{stats.pairs}</span>
                 </div>
               </div>
@@ -316,8 +316,8 @@ export default function App() {
                       </div>
                       
                       <div className="glass-panel-inner rounded-xl p-3 flex justify-between items-center text-sm mb-6">
-                        <span className="text-white/70">Partnerships</span>
-                        <span className="font-medium">{stats.pairs} Pairs Active</span>
+                        <span className="text-white/70">Roommates</span>
+                        <span className="font-medium">{stats.pairs} Roommate Pairs</span>
                       </div>
 
                       <div className="flex items-center gap-3">
@@ -392,7 +392,7 @@ export default function App() {
                                 <h4 className="text-sm font-semibold">{v.name}</h4>
                                 <p className="text-xs text-white/60">{v.campus.split(' ')[0]} • Room {v.room}</p>
                               </div>
-                              <span className="text-[10px] px-2 py-1 bg-amber-500/20 text-amber-400 rounded-md whitespace-nowrap">Partner: {v.partner.split(' ')[0]}</span>
+                              <span className="text-[10px] px-2 py-1 bg-amber-500/20 text-amber-400 rounded-md whitespace-nowrap">Roommate: {v.partner.split(' ')[0]}</span>
                             </div>
                             <div className="flex justify-between items-center mt-1 pt-2 border-t border-white/5">
                               <span className="text-[10px] text-white/40 flex items-center gap-1">
@@ -525,7 +525,7 @@ export default function App() {
                         <span className="font-medium font-mono">{result.room}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Partner</span>
+                        <span className="text-muted-foreground">Roommate</span>
                         <span className="font-medium">{result.partner}</span>
                       </div>
                       <div className="flex justify-between text-sm items-center">
@@ -562,7 +562,7 @@ export default function App() {
                                 timestamp: new Date(Date.now() + 1000 * 60 * 5).toISOString(), // scheduled for 5 mins from now
                               };
                               setEmailsList(prev => [newEmail, ...prev]);
-                              toast.success(`Email scheduled for partner: ${v.partner}`);
+                              toast.success(`Email scheduled for roommate: ${v.partner}`);
                             }
                           }
                         }}>
@@ -616,7 +616,7 @@ export default function App() {
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Volunteer Name</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Campus</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Room</TableHead>
-                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Partner</TableHead>
+                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Roommate</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Key Status</TableHead>
                       <TableHead className="h-11 px-6 w-[80px]"></TableHead>
                     </TableRow>
