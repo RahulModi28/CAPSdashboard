@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -32,36 +32,36 @@
 :root {
   --radius: 1rem; /* Softer, larger border radius for widgets */
 
-  /* App Dashboard Theme - Luxurious Dark */
-  --background:         231 16% 12%; /* #1c1d25 */
-  --foreground:         0 0% 100%; /* White text */
+  /* App Dashboard Theme - Luxurious Light (Adapting to bright bg) */
+  --background:         0 0% 98%;
+  --foreground:         231 20% 12%;
   
-  --card:               231 16% 15%;   /* Dark widgets */
-  --card-foreground:    0 0% 100%;
+  --card:               0 0% 100%;
+  --card-foreground:    231 20% 12%;
   
-  --popover:            231 16% 15%;
-  --popover-foreground: 0 0% 100%;
+  --popover:            0 0% 100%;
+  --popover-foreground: 231 20% 12%;
   
-  /* Primary Accent: Indigo/Violet */
-  --primary:            255 85% 67%; /* Lighter purple */
+  /* Primary Accent: Sky Blue */
+  --primary:            199 89% 48%;
   --primary-foreground: 0 0% 100%;
   
-  --secondary:          231 16% 20%; 
-  --secondary-foreground:0 0% 100%;
+  --secondary:          240 5% 90%; 
+  --secondary-foreground:231 20% 12%;
   
-  --muted:              231 16% 20%; 
-  --muted-foreground:   0 0% 70%;
+  --muted:              240 5% 90%; 
+  --muted-foreground:   231 20% 40%;
   
-  --accent:             231 16% 20%; 
-  --accent-foreground:  0 0% 100%;
+  --accent:             240 5% 90%; 
+  --accent-foreground:  231 20% 12%;
   
-  --border:             231 16% 25%; 
-  --input:              231 16% 25%;
-  --ring:               255 85% 67%;
+  --border:             240 5% 85%; 
+  --input:              240 5% 85%;
+  --ring:               199 89% 48%;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 *, *::before, *::after {
@@ -71,7 +71,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: linear-gradient(145deg, #2b2c45 0%, #1e1f2b 50%, #16161b 100%);
+  background: url('./assets/bg.jpg') center/cover no-repeat fixed;
   color: hsl(var(--foreground));
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -79,16 +79,7 @@ body {
 }
 
 body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 15% 50%, rgba(103, 80, 164, 0.08) 0%, transparent 50%),
-              radial-gradient(circle at 85% 30%, rgba(138, 107, 225, 0.08) 0%, transparent 50%);
-  z-index: -1;
-  pointer-events: none;
+  display: none;
 }
 
 /* App dashboard animations */
@@ -119,16 +110,16 @@ body::before {
 
 /* ── Luxurious Glassmorphism Styles ── */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255,255,255,0.4);
 }
 
 .glass-panel-inner {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .dark-hero-bg {
@@ -164,4 +155,19 @@ body::before {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Custom Scrollbar for lists */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(14, 165, 233, 0.3);
+  border-radius: 4px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(14, 165, 233, 0.5);
 }

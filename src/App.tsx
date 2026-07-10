@@ -22,6 +22,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { volunteers as initialVolunteers, type Volunteer } from "@/data/volunteers";
 import { initialEmails, type EmailEvent } from "@/data/emails";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis } from "recharts";
+import logo from "./assets/logo.png";
 
 function initials(name: string) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
@@ -44,9 +45,9 @@ export default function App() {
     const failed = emailsList.filter(e => e.status === "failed").length;
     
     return [
-      { name: 'Sent', value: sent, color: '#34a076' }, 
-      { name: 'Pending & Scheduled', value: pending, color: '#d69e38' },
-      { name: 'Failed', value: failed, color: '#d95858' },
+      { name: 'Sent', value: sent, color: '#0284c7' }, 
+      { name: 'Pending & Scheduled', value: pending, color: '#38bdf8' },
+      { name: 'Failed', value: failed, color: '#7dd3fc' },
     ].filter(d => d.value > 0);
   }, [emailsList]);
 
@@ -57,6 +58,24 @@ export default function App() {
     scheduled: emailsList.filter(e => e.status === "scheduled").length,
     failed: emailsList.filter(e => e.status === "failed").length,
   }), [emailsList]);
+
+  const sendRealEmails = async (recipients: string[], subject: string, body: string) => {
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipients, subject, body }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send emails');
+      }
+      return true;
+    } catch (error: any) {
+      toast.error(error.message || "Failed to connect to email server");
+      return false;
+    }
+  };
 
   const hourlyData = useMemo(() => {
     const hours = Array.from({length: 12}, (_, i) => {
@@ -145,7 +164,7 @@ export default function App() {
       <Toaster position="top-right" theme="light" />
 
       {/* ── THIN LEFT SIDEBAR ── */}
-      <aside className="w-16 flex-shrink-0 glass-panel border-r border-white/10 flex flex-col items-center py-6 justify-between z-20">
+      <aside className="w-16 flex-shrink-0 glass-panel border-r border-slate-300/60 flex flex-col items-center py-6 justify-between z-20">
         <div className="flex flex-col items-center gap-8">
           <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center premium-shadow mb-4">
             <Users className="w-5 h-5" />
@@ -176,7 +195,10 @@ export default function App() {
       </aside>
 
       {/* ── INNER SIDEBAR (ACCOUNTS / STATS) ── */}
-      <aside className="w-72 flex-shrink-0 glass-panel border-r border-white/10 p-6 overflow-y-auto hidden md:block z-10">
+      <aside className="w-72 flex-shrink-0 glass-panel border-r border-slate-300/60 p-6 overflow-y-auto hidden md:block z-10">
+        <div className="mb-6">
+          <img src={logo} alt="Logo" className="w-full h-auto object-contain" />
+        </div>
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-semibold tracking-tight">Overview</h2>
           <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 rounded-full">
@@ -247,12 +269,12 @@ export default function App() {
                 <div className="max-w-6xl mx-auto">
                   <header className="flex items-center justify-between mb-8">
                     <div>
-                      <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
-                      <p className="text-sm text-white/60 mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                      <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
+                      <p className="text-sm text-slate-600 mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="glass-panel-inner text-white px-4 py-2 rounded-xl border-white/10 font-medium shadow-none">
-                        <span className="w-2 h-2 rounded-full bg-[#10b981] mr-2 inline-block shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>
+                      <Badge variant="outline" className="glass-panel-inner text-slate-900 px-4 py-2 rounded-xl border-slate-300/60 font-medium shadow-none">
+                        <span className="w-2 h-2 rounded-full bg-[#0284c7] mr-2 inline-block shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>
                         System Operational
                       </Badge>
                     </div>
@@ -262,12 +284,12 @@ export default function App() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                 
                     {/* Card 1: Total Volunteers — Real Campus Distribution Bars */}
-                    <div className="glass-panel rounded-3xl p-6 text-white transition-all hover:scale-[1.01] duration-300">
+                    <div className="glass-panel rounded-3xl p-6 text-slate-900 transition-all hover:scale-[1.01] duration-300">
                       <div className="flex justify-between items-start mb-2">
-                        <p className="text-xs font-semibold tracking-wider text-white/50 uppercase">Total Volunteers</p>
+                        <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">Total Volunteers</p>
                       </div>
                       <div className="mb-4">
-                        <span className="text-4xl lg:text-5xl font-bold tracking-tight">{stats.total} <span className="text-xl text-white/60 font-medium">People</span></span>
+                        <span className="text-4xl lg:text-5xl font-bold tracking-tight">{stats.total} <span className="text-xl text-slate-600 font-medium">People</span></span>
                       </div>
 
                       {/* Campus Distribution Bar Chart */}
@@ -275,7 +297,7 @@ export default function App() {
                         {Object.entries(stats.campusCounts).map(([campus, count], i) => {
                           const maxCount = Math.max(...(Object.values(stats.campusCounts) as number[]));
                           const heightPx = Math.max(16, ((count as number) / maxCount) * 92);
-                          const colors = ['#f59e0b','#a78bfa','#38bdf8','#f87171','#34d399','#fb923c'];
+                          const colors = ['#38bdf8','#0ea5e9','#38bdf8','#7dd3fc','#0284c7','#38bdf8'];
                           const words = campus.split(' ');
                           const label = words.length > 1 ? words[words.length - 2] || words[0] : words[0];
                           return (
@@ -298,7 +320,7 @@ export default function App() {
                                   boxShadow: `0 0 12px ${colors[i % colors.length]}55`,
                                 }}
                               />
-                              <span className="text-[10px] text-white/40 truncate w-full text-center group-hover:text-white transition-colors pb-1">{label}</span>
+                              <span className="text-[10px] text-slate-500 truncate w-full text-center group-hover:text-slate-900 transition-colors pb-1">{label}</span>
                             </div>
                           );
                         })}
@@ -306,41 +328,41 @@ export default function App() {
                     </div>
 
                     {/* Card 2: Rooms Assigned (Mimicking "Site Power Use") */}
-                    <div className="glass-panel rounded-3xl p-6 text-white transition-all hover:scale-[1.01] duration-300">
+                    <div className="glass-panel rounded-3xl p-6 text-slate-900 transition-all hover:scale-[1.01] duration-300">
                       <div className="flex justify-between items-start mb-2">
-                        <p className="text-xs font-semibold tracking-wider text-white/50 uppercase">Rooms Assigned</p>
-                        <DoorOpen className="w-4 h-4 text-[#ff8c00]" />
+                        <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">Rooms Assigned</p>
+                        <DoorOpen className="w-4 h-4 text-[#0ea5e9]" />
                       </div>
                       <div className="mb-6">
-                        <span className="text-4xl lg:text-5xl font-bold tracking-tight">{stats.rooms} <span className="text-xl text-white/60 font-medium">Rooms</span></span>
+                        <span className="text-4xl lg:text-5xl font-bold tracking-tight">{stats.rooms} <span className="text-xl text-slate-600 font-medium">Rooms</span></span>
                       </div>
                       
                       <div className="glass-panel-inner rounded-xl p-3 flex justify-between items-center text-sm mb-6">
-                        <span className="text-white/70">Roommates</span>
+                        <span className="text-slate-700">Roommates</span>
                         <span className="font-medium">{stats.pairs} Roommate Pairs</span>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                          <Building2 className="w-4 h-4 text-white/70" />
+                        <div className="w-8 h-8 rounded-full bg-white/60 flex items-center justify-center">
+                          <Building2 className="w-4 h-4 text-slate-700" />
                         </div>
                         <div className="flex-1 flex items-center gap-1">
                           {Array.from({length: 30}).map((_, i) => (
-                            <div key={i} className={`w-1.5 h-4 rounded-sm ${i < (stats.rooms/stats.total)*30 ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.4)]' : 'bg-white/10'}`}></div>
+                            <div key={i} className={`w-1.5 h-4 rounded-sm ${i < (stats.rooms/stats.total)*30 ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.4)]' : 'bg-white/80'}`}></div>
                           ))}
                         </div>
                       </div>
                     </div>
 
                     {/* Card 3: Keys Collected — SVG Circular Progress Ring */}
-                    <div className="glass-panel rounded-3xl p-6 text-white transition-all hover:scale-[1.01] duration-300">
+                    <div className="glass-panel rounded-3xl p-6 text-slate-900 transition-all hover:scale-[1.01] duration-300">
                       <div className="flex justify-between items-start mb-2">
-                        <p className="text-xs font-semibold tracking-wider text-white/50 uppercase">Keys Collected</p>
-                        <Key className="w-4 h-4 text-[#ff8c00]" />
+                        <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">Keys Collected</p>
+                        <Key className="w-4 h-4 text-[#0ea5e9]" />
                       </div>
                       <div className="mb-4 flex items-baseline gap-2">
                         <span className="text-4xl lg:text-5xl font-bold tracking-tight">{stats.keysCollected}</span>
-                        <span className="text-xl text-white/60 font-medium">/ {stats.total}</span>
+                        <span className="text-xl text-slate-600 font-medium">/ {stats.total}</span>
                       </div>
 
                       <div className="flex items-center gap-6">
@@ -350,7 +372,7 @@ export default function App() {
                             <circle cx="36" cy="36" r="28" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
                             <circle
                               cx="36" cy="36" r="28" fill="none"
-                              stroke="#10b981"
+                              stroke="#0284c7"
                               strokeWidth="7"
                               strokeLinecap="round"
                               strokeDasharray={`${2 * Math.PI * 28}`}
@@ -359,29 +381,29 @@ export default function App() {
                               style={{ transition: 'stroke-dashoffset 0.8s ease', filter: 'drop-shadow(0 0 6px rgba(16,185,129,0.6))' }}
                             />
                           </svg>
-                          <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-[#10b981]">
+                          <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-[#0284c7]">
                             {stats.total > 0 ? Math.round((stats.keysCollected / stats.total) * 100) : 0}%
                           </span>
                         </div>
                         <div className="space-y-1.5 text-sm">
-                          <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10b981]"></span><span className="text-white/70">Collected: <span className="font-semibold text-white">{stats.keysCollected}</span></span></div>
-                          <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-400"></span><span className="text-white/70">Pending: <span className="font-semibold text-white">{stats.keysPending}</span></span></div>
+                          <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#0284c7]"></span><span className="text-slate-700">Collected: <span className="font-semibold text-slate-900">{stats.keysCollected}</span></span></div>
+                          <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-400"></span><span className="text-slate-700">Pending: <span className="font-semibold text-slate-900">{stats.keysPending}</span></span></div>
                         </div>
                       </div>
                     </div>
 
                     {/* Card 4: Keys Pending — Campus-wise Pending Breakdown */}
-                    <div className="glass-panel rounded-3xl p-6 text-white transition-all hover:scale-[1.01] duration-300">
+                    <div className="glass-panel rounded-3xl p-6 text-slate-900 transition-all hover:scale-[1.01] duration-300">
                       <div className="flex justify-between items-start mb-2">
-                        <p className="text-xs font-semibold tracking-wider text-white/50 uppercase">Keys Pending</p>
-                        <KeyRound className="w-4 h-4 text-[#ff8c00]" />
+                        <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">Keys Pending</p>
+                        <KeyRound className="w-4 h-4 text-[#0ea5e9]" />
                       </div>
                       <div className="mb-4">
-                        <span className="text-4xl lg:text-5xl font-bold tracking-tight">{stats.keysPending} <span className="text-xl text-white/60 font-medium">People</span></span>
+                        <span className="text-4xl lg:text-5xl font-bold tracking-tight">{stats.keysPending} <span className="text-xl text-slate-600 font-medium">People</span></span>
                       </div>
 
                       {/* Action List for Pending Volunteers */}
-                      <div className="space-y-3 h-[180px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 scrollbar-track-transparent">
+                      <div className="space-y-3 h-[230px] overflow-y-auto pr-2 custom-scrollbar">
                         {volunteers
                           .filter(v => !v.keysCollected)
                           .slice(0, 10) // Show top 10 pending to prevent overwhelming the card
@@ -390,21 +412,21 @@ export default function App() {
                             <div className="flex justify-between items-start">
                               <div>
                                 <h4 className="text-sm font-semibold">{v.name}</h4>
-                                <p className="text-xs text-white/60">{v.campus.split(' ')[0]} • Room {v.room}</p>
+                                <p className="text-xs text-slate-600">{v.campus.split(' ')[0]} • Room {v.room}</p>
                               </div>
                               <span className="text-[10px] px-2 py-1 bg-amber-500/20 text-amber-400 rounded-md whitespace-nowrap">Roommate: {v.partner.split(' ')[0]}</span>
                             </div>
-                            <div className="flex justify-between items-center mt-1 pt-2 border-t border-white/5">
-                              <span className="text-[10px] text-white/40 flex items-center gap-1">
+                            <div className="flex justify-between items-center mt-1 pt-2 border-t border-slate-300/40">
+                              <span className="text-[10px] text-slate-500 flex items-center gap-1">
                                 {emailsList.some(e => e.recipientName === v.name && e.status === "sent") 
-                                  ? <><Mail className="w-3 h-3 text-[#10b981]" /> Email sent</>
+                                  ? <><Mail className="w-3 h-3 text-[#0284c7]" /> Email sent</>
                                   : <><Clock className="w-3 h-3 text-amber-400" /> No email yet</>
                                 }
                               </span>
                               <Button 
                                 size="sm" 
                                 variant="ghost" 
-                                className="h-6 text-[10px] bg-white/5 hover:bg-[#10b981]/20 hover:text-[#10b981] text-white/70 rounded-md px-2"
+                                className="h-6 text-[10px] bg-white/60 hover:bg-[#0284c7]/20 hover:text-[#0284c7] text-slate-700 rounded-md px-2"
                                 onClick={() => {
                                   const updated = [...volunteers];
                                   const idx = updated.findIndex(vol => vol.reg === v.reg);
@@ -418,8 +440,8 @@ export default function App() {
                           </div>
                         ))}
                         {stats.keysPending === 0 && (
-                          <div className="flex flex-col items-center justify-center h-full text-white/40">
-                            <CheckCircle2 className="w-8 h-8 mb-2 text-[#10b981]/50" />
+                          <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                            <CheckCircle2 className="w-8 h-8 mb-2 text-[#0284c7]/50" />
                             <p className="text-sm">All keys collected!</p>
                           </div>
                         )}
@@ -463,7 +485,7 @@ export default function App() {
                     <button 
                       key={r} 
                       onClick={() => quickFill(r)} 
-                      className="whitespace-nowrap font-mono text-xs font-medium px-3 py-1.5 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-colors"
+                      className="whitespace-nowrap font-mono text-sm font-semibold text-slate-500 hover:text-primary transition-colors hover:underline"
                     >
                       {r}
                     </button>
@@ -546,23 +568,31 @@ export default function App() {
                           Mark as Pending
                         </Button>
                       ) : (
-                        <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => {
+                        <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={async () => {
                           const v = volunteers.find(v => v.reg === result.reg);
                           if (v) { 
                             v.keysCollected = true; 
                             setResult({...v}); 
-                            // Mock scheduling an email
+                            // Send an email to the partner
                             if (v.partner) {
-                              const newEmail: EmailEvent = {
-                                id: `EML-${Date.now()}`,
-                                recipientName: v.partner,
-                                recipientEmail: `${v.partner.toLowerCase().replace(/ /g, '.')}@example.com`,
-                                subject: "Your Roommate Has Collected Keys",
-                                status: "scheduled",
-                                timestamp: new Date(Date.now() + 1000 * 60 * 5).toISOString(), // scheduled for 5 mins from now
-                              };
-                              setEmailsList(prev => [newEmail, ...prev]);
-                              toast.success(`Email scheduled for roommate: ${v.partner}`);
+                              const recipientEmail = `${v.partner.toLowerCase().replace(/ /g, '.')}@example.com`;
+                              const subject = "Your Roommate Has Collected Keys";
+                              const body = `<p>Hello ${v.partner},</p><p>Your roommate ${v.name} has successfully collected the room keys.</p>`;
+                              
+                              const success = await sendRealEmails([recipientEmail], subject, body);
+                              
+                              if (success) {
+                                const newEmail: EmailEvent = {
+                                  id: `EML-${Date.now()}`,
+                                  recipientName: v.partner,
+                                  recipientEmail,
+                                  subject,
+                                  status: "scheduled",
+                                  timestamp: new Date(Date.now() + 1000 * 60 * 5).toISOString(), // scheduled for 5 mins from now
+                                };
+                                setEmailsList(prev => [newEmail, ...prev]);
+                                toast.success(`Email scheduled for roommate: ${v.partner}`);
+                              }
                             }
                           }
                         }}>
@@ -640,7 +670,7 @@ export default function App() {
                           }}
                         >
                           <TableCell className="px-6 py-3.5">
-                            <span className="font-mono text-xs font-medium text-foreground bg-secondary px-2 py-1 rounded-md">
+                            <span className="font-mono text-sm font-semibold text-slate-700">
                               {v.reg}
                             </span>
                           </TableCell>
@@ -695,11 +725,20 @@ export default function App() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <header className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-white">Email Delivery</h1>
-                  <p className="text-sm text-white/60 mt-1">Track and manage automated communications</p>
+                  <h1 className="text-3xl font-bold tracking-tight text-slate-900">Email Delivery</h1>
+                  <p className="text-sm text-slate-600 mt-1">Track and manage automated communications</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button variant="outline" className="glass-panel text-white border-white/10" onClick={() => toast.success('Connection test passed!')}>
+                  <Button 
+                    variant="outline" 
+                    className="glass-panel text-slate-900 border-slate-300/60" 
+                    onClick={async () => {
+                      toast.loading('Testing connection...');
+                      const success = await sendRealEmails(['test@example.com'], 'CAPS Email Test', '<p>This is a test connection from CAPS Dashboard.</p>');
+                      toast.dismiss();
+                      if (success) toast.success('Connection test passed! Emails can be sent.');
+                    }}
+                  >
                     <Send className="w-4 h-4 mr-2" />
                     Test Connection
                   </Button>
@@ -709,18 +748,18 @@ export default function App() {
               {/* ── ROW 1: KPI Cards ── */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: 'Total Emails', value: emailStats.total, color: '#9482c9', icon: Mail },
-                  { label: 'Successfully Sent', value: emailStats.sent, color: '#34a076', icon: CheckCircle2 },
-                  { label: 'Pending / Queued', value: emailStats.pending + emailStats.scheduled, color: '#d69e38', icon: Clock },
-                  { label: 'Failed', value: emailStats.failed, color: '#d95858', icon: AlertCircle },
+                  { label: 'Total Emails', value: emailStats.total, color: '#0ea5e9', icon: Mail },
+                  { label: 'Successfully Sent', value: emailStats.sent, color: '#0284c7', icon: CheckCircle2 },
+                  { label: 'Pending / Queued', value: emailStats.pending + emailStats.scheduled, color: '#38bdf8', icon: Clock },
+                  { label: 'Failed', value: emailStats.failed, color: '#7dd3fc', icon: AlertCircle },
                 ].map(({ label, value, color, icon: Icon }) => (
-                  <div key={label} className="glass-panel rounded-2xl p-5 text-white">
+                  <div key={label} className="glass-panel rounded-2xl p-5 text-slate-900">
                     <div className="flex justify-between items-start mb-3">
-                      <p className="text-xs font-semibold tracking-wider text-white/50 uppercase">{label}</p>
+                      <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">{label}</p>
                       <Icon className="w-4 h-4" style={{ color }} />
                     </div>
                     <p className="text-4xl font-bold" style={{ color }}>{value}</p>
-                    <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div className="mt-3 h-1 bg-white/80 rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${emailStats.total > 0 ? (value / emailStats.total) * 100 : 0}%`, backgroundColor: color, transition: 'width 0.6s ease' }} />
                     </div>
                   </div>
@@ -732,7 +771,7 @@ export default function App() {
 
                 {/* Hourly Activity Timeline */}
                 <Card className="glass-panel border-0 rounded-2xl overflow-hidden lg:col-span-2">
-                  <CardHeader className="px-6 py-4 border-b border-white/10">
+                  <CardHeader className="px-6 py-4 border-b border-slate-300/60">
                     <CardTitle className="text-sm font-bold">Hourly Activity Timeline</CardTitle>
                     <p className="text-xs text-muted-foreground mt-0.5">Emails sent per hour (last 12 hours)</p>
                   </CardHeader>
@@ -740,13 +779,13 @@ export default function App() {
                     <div className="h-[180px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={hourlyData} barSize={14}>
-                          <XAxis dataKey="hour" tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                          <YAxis tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                          <XAxis dataKey="hour" tick={{ fill: 'rgba(15,23,42,0.6)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fill: 'rgba(15,23,42,0.6)', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
                           <Tooltip
-                            contentStyle={{ background: 'rgba(30,31,43,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white' }}
+                            contentStyle={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#0f172a' }}
                             cursor={false}
                           />
-                          <Bar dataKey="emails" fill="#9482c9" radius={[4,4,0,0]} />
+                          <Bar dataKey="emails" fill="#0ea5e9" radius={[4,4,0,0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -755,7 +794,7 @@ export default function App() {
 
                 {/* Status Donut */}
                 <Card className="glass-panel border-0 rounded-2xl overflow-hidden">
-                  <CardHeader className="px-6 py-4 border-b border-white/10">
+                  <CardHeader className="px-6 py-4 border-b border-slate-300/60">
                     <CardTitle className="text-sm font-bold">Status Distribution</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4">
@@ -767,7 +806,7 @@ export default function App() {
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip contentStyle={{ background: 'rgba(30,31,43,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white' }} cursor={false} />
+                          <Tooltip contentStyle={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#0f172a' }} cursor={false} />
                           <Legend wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }} />
                         </PieChart>
                       </ResponsiveContainer>
@@ -781,7 +820,7 @@ export default function App() {
 
                 {/* Campus Delivery Rates */}
                 <Card className="glass-panel border-0 rounded-2xl overflow-hidden">
-                  <CardHeader className="px-6 py-4 border-b border-white/10">
+                  <CardHeader className="px-6 py-4 border-b border-slate-300/60">
                     <CardTitle className="text-sm font-bold">Delivery Rate by Campus</CardTitle>
                     <p className="text-xs text-muted-foreground mt-0.5">Success rate of emails per campus</p>
                   </CardHeader>
@@ -791,15 +830,15 @@ export default function App() {
                     ) : campusDelivery.map(({ campus, label, rate, sent, total }) => (
                       <div key={campus}>
                         <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-sm font-medium text-white/80">{label}</span>
-                          <span className="text-xs text-muted-foreground">{sent}/{total} sent · <span className="font-semibold" style={{ color: rate >= 80 ? '#10b981' : rate >= 50 ? '#f59e0b' : '#ef4444' }}>{rate}%</span></span>
+                          <span className="text-sm font-medium text-slate-800">{label}</span>
+                          <span className="text-xs text-muted-foreground">{sent}/{total} sent · <span className="font-semibold" style={{ color: rate >= 80 ? '#0284c7' : rate >= 50 ? '#38bdf8' : '#7dd3fc' }}>{rate}%</span></span>
                         </div>
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-2 bg-white/80 rounded-full overflow-hidden">
                           <div
                             className="h-full rounded-full"
                             style={{
                               width: `${rate}%`,
-                              backgroundColor: rate >= 80 ? '#10b981' : rate >= 50 ? '#f59e0b' : '#ef4444',
+                              backgroundColor: rate >= 80 ? '#0284c7' : rate >= 50 ? '#38bdf8' : '#7dd3fc',
                               transition: 'width 0.6s ease',
                             }}
                           />
@@ -817,13 +856,13 @@ export default function App() {
 
                 {/* Broadcast Panel */}
                 <Card className="glass-panel border-0 rounded-2xl overflow-hidden">
-                  <CardHeader className="px-6 py-4 border-b border-white/10">
+                  <CardHeader className="px-6 py-4 border-b border-slate-300/60">
                     <CardTitle className="text-sm font-bold">Broadcast Panel</CardTitle>
                     <p className="text-xs text-muted-foreground mt-0.5">Trigger a bulk email to a campus group</p>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     <div>
-                      <label className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2 block">Select Campus</label>
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">Select Campus</label>
                       <div className="flex flex-wrap gap-2">
                         {['All Campuses', ...Object.keys(stats.campusCounts).map(c => c.split(' ').slice(-2,-1)[0] || c)].map((c, i) => (
                           <button
@@ -831,15 +870,15 @@ export default function App() {
                             onClick={() => setBroadcastCampus(i === 0 ? 'All Campuses' : Object.keys(stats.campusCounts)[i-1])}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                               broadcastCampus === (i === 0 ? 'All Campuses' : Object.keys(stats.campusCounts)[i-1])
-                                ? 'bg-primary text-white'
-                                : 'glass-panel-inner text-white/60 hover:text-white'
+                                ? 'bg-primary text-slate-900'
+                                : 'glass-panel-inner text-slate-600 hover:text-slate-900'
                             }`}
                           >{c}</button>
                         ))}
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2 block">Email Trigger</label>
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">Email Trigger</label>
                       <div className="flex flex-col gap-2">
                         {['Key Collection Reminder', 'Room Assignment Notice', 'Event Schedule Update', 'Emergency Alert'].map(trigger => (
                           <button
@@ -848,29 +887,49 @@ export default function App() {
                             className={`px-4 py-2.5 rounded-xl text-sm text-left font-medium transition-all flex items-center gap-3 ${
                               broadcastTrigger === trigger
                                 ? 'bg-primary/20 text-primary border border-primary/40'
-                                : 'glass-panel-inner text-white/60 hover:text-white border border-transparent'
+                                : 'glass-panel-inner text-slate-600 hover:text-slate-900 border border-transparent'
                             }`}
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${broadcastTrigger === trigger ? 'bg-primary' : 'bg-white/20'}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${broadcastTrigger === trigger ? 'bg-primary' : 'bg-white'}`} />
                             {trigger}
                           </button>
                         ))}
                       </div>
                     </div>
                     <Button
-                      className="w-full bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl h-11"
-                      onClick={() => {
+                      className="w-full bg-primary hover:bg-primary/90 text-slate-900 font-semibold rounded-xl h-11"
+                      onClick={async () => {
                         const targets = broadcastCampus === 'All Campuses' ? volunteers : volunteers.filter(v => v.campus === broadcastCampus);
-                        const newEmails: EmailEvent[] = targets.map(v => ({
-                          id: `EML-${Date.now()}-${v.reg}`,
-                          recipientName: v.name,
-                          recipientEmail: `${v.name.toLowerCase().replace(/ /g, '.')}@example.com`,
-                          subject: broadcastTrigger,
-                          status: 'scheduled',
-                          timestamp: new Date(Date.now() + 1000 * 60 * 2).toISOString(),
-                        }));
-                        setEmailsList(prev => [...newEmails, ...prev]);
-                        toast.success(`${newEmails.length} emails queued for ${broadcastCampus}`);
+                        
+                        toast.loading(`Sending ${targets.length} emails...`);
+                        
+                        // Extract emails from targets
+                        const recipientEmails = targets.map(v => `${v.name.toLowerCase().replace(/ /g, '.')}@example.com`);
+                        
+                        // Using a dummy body for the demo based on the trigger
+                        const body = `
+                          <h2>Hello CAPS Volunteer</h2>
+                          <p>This is an automated notification regarding: <strong>${broadcastTrigger}</strong></p>
+                          <br>
+                          <p>Thank you,<br>CAPS Team</p>
+                        `;
+
+                        const success = await sendRealEmails(recipientEmails, broadcastTrigger, body);
+                        
+                        toast.dismiss();
+
+                        if (success) {
+                          const newEmails: EmailEvent[] = targets.map(v => ({
+                            id: `EML-${Date.now()}-${v.reg}`,
+                            recipientName: v.name,
+                            recipientEmail: `${v.name.toLowerCase().replace(/ /g, '.')}@example.com`,
+                            subject: broadcastTrigger,
+                            status: 'scheduled',
+                            timestamp: new Date(Date.now() + 1000 * 60 * 2).toISOString(),
+                          }));
+                          setEmailsList(prev => [...newEmails, ...prev]);
+                          toast.success(`${newEmails.length} emails queued for ${broadcastCampus}`);
+                        }
                       }}
                     >
                       <Send className="w-4 h-4 mr-2" />
@@ -882,7 +941,7 @@ export default function App() {
 
               {/* ── ROW 4: Email Log ── */}
               <Card className="glass-panel border-0 rounded-2xl overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 p-6 pb-4">
+                <CardHeader className="flex flex-row items-center justify-between border-b border-slate-300/60 p-6 pb-4">
                   <div>
                     <CardTitle className="text-lg font-semibold">Email Log</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">Recent automated messages</p>
