@@ -21,14 +21,13 @@ const mockVolunteers = [
   { reg_no: "2524448", name: "Aditya Bose",     campus: "Bangalore Kengeri Campus",    room: "C-312", partner_name: "Ishaan Malhotra",keys_collected: true, email: "aditya@example.com" },
   { reg_no: "2524449", name: "Varun Tiwari",    campus: "Bangalore Yeshwanthpur",      room: "D-108", partner_name: "Siddharth Roy",  keys_collected: false, email: "varun@example.com" },
   { reg_no: "2524450", name: "Siddharth Roy",   campus: "Bangalore Yeshwanthpur",      room: "D-108", partner_name: "Varun Tiwari",   keys_collected: false, email: "siddharth@example.com" },
-  { reg_no: "2524451", name: "Arjun Kapoor",    campus: "Delhi NCR Campus",            room: "E-215", partner_name: "Rahul Kumar",    keys_collected: true, email: "arjun@example.com" },
-  { reg_no: "2524452", name: "Rahul Kumar",     campus: "Delhi NCR Campus",            room: "E-215", partner_name: "Arjun Kapoor",   keys_collected: true, email: "rmodi182@gmail.com" }, // Assigned the requested email here!
+  { reg_no: "2524451", name: "Arjun Kapoor",    campus: "Bangalore Central Campus",    room: "E-215", partner_name: "Rahul Kumar",    keys_collected: true, email: "arjun@example.com" },
+  { reg_no: "2524452", name: "Rahul Kumar",     campus: "Bangalore Central Campus",    room: "E-215", partner_name: "Arjun Kapoor",   keys_collected: true, email: "rmodi182@gmail.com" }, // Assigned the requested email here!
 
   // Girls
   { reg_no: "2524453", name: "Sneha Kulkarni",  campus: "Bangalore Central Campus",    room: "A-203", partner_name: "Anjali Verma",   keys_collected: false, email: "sneha@example.com" },
   { reg_no: "2524454", name: "Anjali Verma",    campus: "Bangalore Central Campus",    room: "A-203", partner_name: "Sneha Kulkarni", keys_collected: true, email: "anjali@example.com" },
-  { reg_no: "2524455", name: "Tanvi Joshi",     campus: "Pune Lavasa Campus",          room: "F-110", partner_name: "Divya Rao",      keys_collected: false, email: "tanvi@example.com" },
-  { reg_no: "2524456", name: "Divya Rao",       campus: "Pune Lavasa Campus",          room: "F-110", partner_name: "Tanvi Joshi",    keys_collected: false, email: "divya@example.com" },
+
   { reg_no: "2524457", name: "Nisha Gupta",     campus: "Bangalore BGR Campus",        room: "B-307", partner_name: "Riya Singh",     keys_collected: true, email: "nisha@example.com" },
   { reg_no: "2524458", name: "Riya Singh",      campus: "Bangalore BGR Campus",        room: "B-307", partner_name: "Nisha Gupta",    keys_collected: true, email: "riya@example.com" },
   { reg_no: "2524459", name: "Meera Iyer",      campus: "Bangalore Kengeri Campus",    room: "C-405", partner_name: "Pooja Reddy",    keys_collected: false, email: "meera@example.com" },
