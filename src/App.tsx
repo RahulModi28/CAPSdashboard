@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/table";
 import { Toaster } from "@/components/ui/sonner";
 
-import { volunteers as initialVolunteers, type Volunteer } from "@/data/volunteers";
-import { initialEmails, type EmailEvent } from "@/data/emails";
+import { type Volunteer } from "@/data/volunteers";
+import { type EmailEvent } from "@/data/emails";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -453,8 +453,6 @@ export default function App() {
 
         {/* ── SCHEDULED QUEUE (Emails / Email-list) ── */}
         {(currentView === "emails" || currentView === "email-list") && (() => {
-          const queued = emailsList.filter(e => e.status === 'scheduled' && new Date(e.timestamp) > now);
-
           return (
             <>
               <div className="flex items-center justify-between mb-6">
