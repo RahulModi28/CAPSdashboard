@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { 
   Search, Users, Building2, DoorOpen, X, 
@@ -21,23 +21,118 @@ import { Toaster } from "@/components/ui/sonner";
 
 import { volunteers as initialVolunteers, type Volunteer } from "@/data/volunteers";
 import { initialEmails, type EmailEvent } from "@/data/emails";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis } from "recharts";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import logo from "./assets/logo.png";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 function initials(name: string) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
+import { supabase } from "@/lib/supabase";
+
 /* ══════════════════════════════════════
    MAIN DASHBOARD APP
 ══════════════════════════════════════ */
 export default function App() {
-  const [volunteers, setVolunteers] = useState(initialVolunteers);
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [query, setQuery] = useState("");
   const [tableFilter, setTableFilter] = useState("");
   const [result, setResult] = useState<Volunteer | "not-found" | "idle" | "loading">("idle");
-  const [currentView, setCurrentView] = useState<"dashboard" | "directory" | "emails">("dashboard");
-  const [emailsList, setEmailsList] = useState<EmailEvent[]>(initialEmails);
+  const [currentView, setCurrentView] = useState<"dashboard" | "directory" | "emails" | "email-list">("dashboard");
+  const [emailsList, setEmailsList] = useState<EmailEvent[]>([]);
+  const [emailTriggers, setEmailTriggers] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      // Fetch Volunteers
+      const { data: vData } = await supabase.from('volunteers').select('*').order('created_at', { ascending: true });
+      if (vData) {
+        // Map database columns to the frontend interface
+        const mappedV = vData.map(v => ({
+          reg: v.reg_no,
+          name: v.name,
+          campus: v.campus,
+          room: v.room,
+          partner: v.partner_name,
+          keysCollected: v.keys_collected,
+          email: v.email
+        }));
+        setVolunteers(mappedV);
+      }
+
+      // Fetch Emails
+      const { data: eData } = await supabase.from('email_logs').select('*').order('timestamp', { ascending: false });
+      if (eData) {
+        const mappedE = eData.map(e => ({
+          id: e.id,
+          recipientName: e.recipient_name,
+          recipientEmail: e.recipient_email,
+          subject: e.subject,
+          status: e.status,
+          timestamp: e.timestamp,
+          reason: e.reason
+        }));
+        setEmailsList(mappedE);
+      }
+
+      // Fetch Triggers
+      const { data: tData } = await supabase.from('email_triggers').select('*').order('trigger_time', { ascending: true });
+      if (tData) {
+        const mappedT = tData.map((t, index) => ({
+          id: t.id,
+          event: t.event_name,
+          campus: t.target_campus,
+          time: new Date(t.trigger_time),
+          status: index < 4 ? 'scheduled' : 'upcoming', // mockup status based on index for now
+          instant: t.is_instant
+        }));
+        setEmailTriggers(mappedT);
+      }
+    }
+    
+    fetchData();
+  }, []);
+  const [emailFilter, setEmailFilter] = useState<{ type: 'all' | 'status' | 'hour', value: string }>({ type: 'all', value: '' });
+  const [now, setNow] = useState(new Date());
+
+  // Tick every second for countdown timers
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const filteredEmails = useMemo(() => {
+    if (emailFilter.type === "all") return emailsList;
+    if (emailFilter.type === "status") {
+      if (emailFilter.value === "pending") return emailsList.filter(e => e.status === "pending" || e.status === "scheduled");
+      return emailsList.filter(e => e.status === emailFilter.value);
+    }
+    if (emailFilter.type === "hour") {
+      const targetHour = parseInt(emailFilter.value.split(':')[0], 10);
+      return emailsList.filter(e => new Date(e.timestamp).getHours() === targetHour);
+    }
+    return emailsList;
+  }, [emailsList, emailFilter]);
 
   const emailPieData = useMemo(() => {
     const sent = emailsList.filter(e => e.status === "sent").length;
@@ -159,6 +254,107 @@ export default function App() {
     doSearch(reg);
   }
 
+  const hourlyChartData = useMemo(() => {
+    return {
+      labels: hourlyData.map(d => d.hour),
+      datasets: [
+        {
+          label: 'Emails',
+          data: hourlyData.map(d => d.emails),
+          backgroundColor: '#0ea5e9',
+          borderRadius: 4,
+          borderSkipped: false,
+        }
+      ]
+    };
+  }, [hourlyData]);
+
+  const hourlyChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    onClick: (_event: any, elements: any[]) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const hourLabel = hourlyData[index].hour;
+        setEmailFilter({ type: 'hour', value: hourLabel });
+        setCurrentView('email-list');
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: 'rgba(15,23,42,0.6)', font: { size: 10 } },
+        border: { display: false }
+      },
+      y: {
+        grid: { display: false },
+        ticks: { color: 'rgba(15,23,42,0.6)', font: { size: 10 }, stepSize: 1 },
+        border: { display: false }
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        titleColor: '#0f172a',
+        bodyColor: '#0f172a',
+        borderColor: 'rgba(255,255,255,0.4)',
+        borderWidth: 1,
+        cornerRadius: 8,
+        displayColors: false,
+      }
+    }
+  };
+
+  const donutChartData = useMemo(() => {
+    return {
+      labels: emailPieData.map(d => d.name),
+      datasets: [
+        {
+          data: emailPieData.map(d => d.value),
+          backgroundColor: emailPieData.map(d => d.color),
+          borderWidth: 0,
+          hoverOffset: 4
+        }
+      ]
+    };
+  }, [emailPieData]);
+
+  const donutChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '70%',
+    onClick: (_event: any, elements: any[]) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const label = emailPieData[index].name;
+        if (label === 'Sent') setEmailFilter({ type: 'status', value: 'sent' });
+        else if (label === 'Pending & Scheduled') setEmailFilter({ type: 'status', value: 'pending' });
+        else if (label === 'Failed') setEmailFilter({ type: 'status', value: 'failed' });
+        setCurrentView('email-list');
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+        labels: {
+          color: 'rgba(15,23,42,0.6)',
+          font: { size: 11 },
+          usePointStyle: true,
+          padding: 20
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        titleColor: '#0f172a',
+        bodyColor: '#0f172a',
+        borderColor: 'rgba(255,255,255,0.4)',
+        borderWidth: 1,
+        cornerRadius: 8,
+      }
+    }
+  };
+
   return (
     <div className="flex h-screen w-full overflow-hidden text-foreground selection:bg-primary/20 selection:text-primary">
       <Toaster position="top-right" theme="light" />
@@ -199,64 +395,125 @@ export default function App() {
         <div className="mb-6">
           <img src={logo} alt="Logo" className="w-full h-auto object-contain" />
         </div>
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-semibold tracking-tight">Overview</h2>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 rounded-full">
-            <Plus className="w-4 h-4" />
-          </Button>
-        </div>
 
-        <div className="space-y-6">
-          {/* Main Stat equivalent to Net Worth */}
-          <div className="pb-6 border-b border-border">
-            <p className="text-sm font-medium text-muted-foreground mb-1">Total Volunteers</p>
-            <p className="text-3xl font-bold tracking-tight">{stats.total}</p>
-          </div>
-
-          {/* Stat List equivalent to Accounts */}
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between text-sm font-semibold mb-2">
-                <span>Campuses</span>
-                <span>{stats.campuses}</span>
+        {/* ── OVERVIEW (Dashboard / Directory) ── */}
+        {(currentView === "dashboard" || currentView === "directory") && (
+          <>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-semibold tracking-tight">Overview</h2>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 rounded-full">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-6">
+              <div className="pb-6 border-b border-border">
+                <p className="text-sm font-medium text-muted-foreground mb-1">Total Volunteers</p>
+                <p className="text-3xl font-bold tracking-tight">{stats.total}</p>
               </div>
-              <div className="pl-4 space-y-2.5 border-l-2 border-muted">
-                {Object.entries(stats.campusCounts).map(([campus, count]) => (
-                  <div key={campus} className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span className="truncate pr-2">{campus}</span>
-                    <span className="font-medium text-foreground flex-shrink-0">{count as number}</span>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between text-sm font-semibold mb-2">
+                    <span>Campuses</span>
+                    <span>{stats.campuses}</span>
                   </div>
-                ))}
+                  <div className="pl-4 space-y-2.5 border-l-2 border-muted">
+                    {Object.entries(stats.campusCounts).map(([campus, count]) => (
+                      <div key={campus} className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span className="truncate pr-2">{campus}</span>
+                        <span className="font-medium text-foreground flex-shrink-0">{count as number}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <Separator className="my-2" />
+                <div>
+                  <div className="flex items-center justify-between text-sm font-semibold mb-2">
+                    <span>Accommodations</span>
+                    <span>{stats.rooms}</span>
+                  </div>
+                  <div className="pl-4 space-y-2.5 border-l-2 border-muted">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Rooms Assigned</span>
+                      <span className="font-medium text-foreground">{stats.rooms}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Roommates</span>
+                      <span className="font-medium text-foreground">{stats.pairs}</span>
+                    </div>
+                  </div>
+                </div>
+                <Separator className="my-2" />
+                <Button variant="outline" className="w-full text-primary border-primary/20 hover:bg-primary/5 font-medium rounded-xl h-10">
+                  + Generate Report
+                </Button>
               </div>
             </div>
+          </>
+        )}
 
-            <Separator className="my-2" />
+        {/* ── SCHEDULED QUEUE (Emails / Email-list) ── */}
+        {(currentView === "emails" || currentView === "email-list") && (() => {
+          const queued = emailsList.filter(e => e.status === 'scheduled' && new Date(e.timestamp) > now);
 
-            <div>
-              <div className="flex items-center justify-between text-sm font-semibold mb-2">
-                <span>Accommodations</span>
-                <span>{stats.rooms}</span>
+          return (
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold tracking-tight">Scheduled Queue</h2>
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sky-500"></span>
+                </span>
               </div>
-              <div className="pl-4 space-y-2.5 border-l-2 border-muted">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Rooms Assigned</span>
-                  <span className="font-medium text-foreground">{stats.rooms}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Roommates</span>
-                  <span className="font-medium text-foreground">{stats.pairs}</span>
-                </div>
+
+              {/* Upcoming trigger events */}
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Upcoming Events</p>
+              <div className="space-y-1">
+                {emailTriggers.map((trigger) => {
+                  const diff = Math.max(0, Math.floor((trigger.time.getTime() - now.getTime()) / 1000));
+                  const hrs = Math.floor(diff / 3600);
+                  const mins = Math.floor((diff % 3600) / 60);
+                  const isImminent = !trigger.instant && diff < 600;
+                  return (
+                    <div key={trigger.id} className="py-2.5 border-b border-border/50 last:border-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-xs font-semibold leading-tight ${trigger.instant ? 'text-sky-600' : 'text-foreground'}`}>{trigger.event}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{trigger.campus}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          {trigger.instant ? (
+                            <span className="inline-flex items-center gap-1">
+                              <span className="relative flex h-1.5 w-1.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-sky-500"></span>
+                              </span>
+                              <span className="text-[11px] font-bold text-sky-600">Instant</span>
+                            </span>
+                          ) : (
+                            <p className={`text-[11px] font-bold tabular-nums ${isImminent ? 'text-sky-600' : 'text-slate-500'}`}>
+                              {hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-            
-            <Separator className="my-2" />
-            
-            <Button variant="outline" className="w-full text-primary border-primary/20 hover:bg-primary/5 font-medium rounded-xl h-10">
-              + Generate Report
-            </Button>
-          </div>
-        </div>
+
+              <Separator className="my-4" />
+              <Button
+                variant="outline"
+                className="w-full text-primary border-primary/20 hover:bg-primary/5 font-medium rounded-xl h-10"
+                onClick={() => { setEmailFilter({ type: 'all', value: '' }); setCurrentView('email-list'); }}
+              >
+                View Full Email Log
+              </Button>
+            </>
+          );
+        })()}
       </aside>
+
 
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10">
@@ -387,7 +644,7 @@ export default function App() {
                         </div>
                         <div className="space-y-1.5 text-sm">
                           <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#0284c7]"></span><span className="text-slate-700">Collected: <span className="font-semibold text-slate-900">{stats.keysCollected}</span></span></div>
-                          <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-400"></span><span className="text-slate-700">Pending: <span className="font-semibold text-slate-900">{stats.keysPending}</span></span></div>
+                          <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-400"></span><span className="text-slate-700">Pending: <span className="font-semibold text-slate-900">{stats.keysPending}</span></span></div>
                         </div>
                       </div>
                     </div>
@@ -414,13 +671,13 @@ export default function App() {
                                 <h4 className="text-sm font-semibold">{v.name}</h4>
                                 <p className="text-xs text-slate-600">{v.campus.split(' ')[0]} • Room {v.room}</p>
                               </div>
-                              <span className="text-[10px] px-2 py-1 bg-amber-500/20 text-amber-400 rounded-md whitespace-nowrap">Roommate: {v.partner.split(' ')[0]}</span>
+                              <span className="text-[10px] px-2 py-1 bg-primary/10 text-primary border border-primary/20 rounded-md whitespace-nowrap font-medium">Roommate: {v.partner.split(' ')[0]}</span>
                             </div>
                             <div className="flex justify-between items-center mt-1 pt-2 border-t border-slate-300/40">
                               <span className="text-[10px] text-slate-500 flex items-center gap-1">
                                 {emailsList.some(e => e.recipientName === v.name && e.status === "sent") 
                                   ? <><Mail className="w-3 h-3 text-[#0284c7]" /> Email sent</>
-                                  : <><Clock className="w-3 h-3 text-amber-400" /> No email yet</>
+                                  : <><Clock className="w-3 h-3 text-blue-500" /> No email yet</>
                                 }
                               </span>
                               <Button 
@@ -555,7 +812,7 @@ export default function App() {
                         {result.keysCollected ? (
                           <span className="text-sm font-semibold text-green-600">Collected</span>
                         ) : (
-                          <span className="text-sm font-semibold text-amber-600">Pending</span>
+                          <span className="text-sm font-semibold text-sky-600">Pending</span>
                         )}
                       </div>
                     </div>
@@ -610,7 +867,7 @@ export default function App() {
           )}
 
           {/* Directory Table Widget (Full width) */}
-          {currentView !== "emails" && (
+          {(currentView === "dashboard" || currentView === "directory") && (
           <Card className="glass-panel border-0 rounded-2xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 p-6 pb-4">
               <div>
@@ -695,7 +952,7 @@ export default function App() {
                             {v.keysCollected ? (
                               <span className="text-sm font-semibold text-green-600">Collected</span>
                             ) : (
-                              <span className="text-sm font-semibold text-amber-600">Pending</span>
+                              <span className="text-sm font-semibold text-sky-600">Pending</span>
                             )}
                           </TableCell>
                           <TableCell className="px-6 py-3.5 text-right">
@@ -777,17 +1034,7 @@ export default function App() {
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="h-[180px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={hourlyData} barSize={14}>
-                          <XAxis dataKey="hour" tick={{ fill: 'rgba(15,23,42,0.6)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                          <YAxis tick={{ fill: 'rgba(15,23,42,0.6)', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                          <Tooltip
-                            contentStyle={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#0f172a' }}
-                            cursor={false}
-                          />
-                          <Bar dataKey="emails" fill="#0ea5e9" radius={[4,4,0,0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
+                      <Bar data={hourlyChartData} options={hourlyChartOptions} />
                     </div>
                   </CardContent>
                 </Card>
@@ -798,18 +1045,8 @@ export default function App() {
                     <CardTitle className="text-sm font-bold">Status Distribution</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4">
-                    <div className="h-[180px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie data={emailPieData} cx="50%" cy="50%" outerRadius={80} dataKey="value" stroke="none">
-                            {emailPieData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip contentStyle={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#0f172a' }} cursor={false} />
-                          <Legend wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }} />
-                        </PieChart>
-                      </ResponsiveContainer>
+                    <div className="h-[210px] pb-2">
+                      <Doughnut data={donutChartData} options={donutChartOptions} />
                     </div>
                   </CardContent>
                 </Card>
@@ -939,65 +1176,163 @@ export default function App() {
                 </Card>
               </div>
 
-              {/* ── ROW 4: Email Log ── */}
-              <Card className="glass-panel border-0 rounded-2xl overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between border-b border-slate-300/60 p-6 pb-4">
-                  <div>
-                    <CardTitle className="text-lg font-semibold">Email Log</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">Recent automated messages</p>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader className="bg-muted/30">
-                        <TableRow className="border-border/50">
-                          <TableHead className="font-semibold text-foreground px-6 py-4">Recipient</TableHead>
-                          <TableHead className="font-semibold text-foreground px-6 py-4">Subject</TableHead>
-                          <TableHead className="font-semibold text-foreground px-6 py-4">Status</TableHead>
-                          <TableHead className="font-semibold text-foreground px-6 py-4">Timestamp</TableHead>
-                          <TableHead className="font-semibold text-foreground px-6 py-4">Details</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {emailsList.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                              No emails found.
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          emailsList.map((email) => (
-                            <TableRow key={email.id} className="border-border/50 hover:bg-muted/30 transition-colors">
-                              <TableCell className="px-6 py-3.5">
-                                <div className="flex flex-col">
-                                  <span className="font-semibold text-sm text-foreground">{email.recipientName}</span>
-                                  <span className="text-xs text-muted-foreground">{email.recipientEmail}</span>
+              {/* ── ROW 4: Scheduled Queue ── */}
+              {(() => {
+                const scheduled = emailsList.filter(e => e.status === 'scheduled' && new Date(e.timestamp) > now);
+                if (scheduled.length === 0) return null;
+                return (
+                  <Card className="glass-panel border-0 rounded-2xl overflow-hidden">
+                    <CardHeader className="flex flex-row items-center justify-between border-b border-slate-300/60 px-6 py-4">
+                      <div>
+                        <CardTitle className="text-sm font-bold flex items-center gap-2">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+                          </span>
+                          Scheduled Queue
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground mt-0.5">{scheduled.length} email{scheduled.length !== 1 ? 's' : ''} pending dispatch</p>
+                      </div>
+                      <Badge className="bg-violet-100 text-violet-700 border-0 text-xs font-semibold">{scheduled.length} queued</Badge>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <ul className="divide-y divide-border/40">
+                        {scheduled.slice(0, 6).map((email) => {
+                          const diff = Math.max(0, Math.floor((new Date(email.timestamp).getTime() - now.getTime()) / 1000));
+                          const mins = Math.floor(diff / 60);
+                          const secs = diff % 60;
+                          const pct = Math.min(100, Math.max(0, 100 - (diff / 300) * 100));
+                          return (
+                            <li key={email.id} className="flex items-center gap-4 px-6 py-3.5 hover:bg-muted/20 transition-colors">
+                              <Avatar className="w-8 h-8 shrink-0">
+                                <AvatarFallback className="bg-violet-100 text-violet-700 text-[10px] font-bold">
+                                  {email.recipientName.split(' ').map((n: string) => n[0]).join('').slice(0,2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-foreground truncate">{email.recipientName}</p>
+                                <p className="text-xs text-muted-foreground truncate">{email.subject}</p>
+                                <div className="mt-1.5 h-1 bg-slate-200 rounded-full overflow-hidden w-32">
+                                  <div className="h-full rounded-full bg-violet-400 transition-all duration-1000" style={{ width: `${pct}%` }} />
                                 </div>
-                              </TableCell>
-                              <TableCell className="px-6 py-3.5 text-sm font-medium">{email.subject}</TableCell>
-                              <TableCell className="px-6 py-3.5">
-                                {email.status === "sent" && <span className="text-sm font-semibold text-green-500">Sent</span>}
-                                {email.status === "pending" && <span className="text-sm font-semibold text-amber-500">Pending</span>}
-                                {email.status === "scheduled" && <span className="text-sm font-semibold text-blue-400">Scheduled</span>}
-                                {email.status === "failed" && <span className="text-sm font-semibold text-red-500">Failed</span>}
-                              </TableCell>
-                              <TableCell className="px-6 py-3.5 text-sm text-muted-foreground">
-                                {new Date(email.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </TableCell>
-                              <TableCell className="px-6 py-3.5 text-sm text-muted-foreground">
-                                {email.reason ? <span className="text-red-400 text-xs">{email.reason}</span> : <span className="text-xs">--</span>}
-                              </TableCell>
-                            </TableRow>
-                          ))
+                              </div>
+                              <div className="text-right shrink-0">
+                                <p className="text-sm font-bold tabular-nums text-violet-600">
+                                  {mins}:{secs.toString().padStart(2, '0')}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">until send</p>
+                              </div>
+                            </li>
+                          );
+                        })}
+                        {scheduled.length > 6 && (
+                          <li className="px-6 py-3 text-center text-xs text-muted-foreground">+{scheduled.length - 6} more scheduled</li>
                         )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+
+              {/* ── ROW 5: Email Log Link ── */}
+              <div className="flex justify-center pt-4">
+                <Button variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => { setEmailFilter({ type: 'all', value: '' }); setCurrentView('email-list'); }}>
+                  View Full Email Log
+                </Button>
+              </div>
 
             </div>
+          )}
+
+          {/* ── EMAIL LIST VIEW ── */}
+          {currentView === "email-list" && (
+          <Card className="glass-panel border-0 rounded-2xl overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 p-6 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="icon" onClick={() => setCurrentView("emails")} className="-ml-2 h-8 w-8 rounded-full">
+                    <ChevronRight className="w-5 h-5 rotate-180" />
+                  </Button>
+                  <CardTitle className="text-lg font-semibold">Email Log</CardTitle>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {emailFilter.type !== "all"
+                    ? `Filtered by: ${emailFilter.value} · ${filteredEmails.length} result${filteredEmails.length !== 1 ? "s" : ""}`
+                    : "All automated messages"}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                {emailFilter.type !== "all" && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer px-2 py-1 flex items-center gap-1"
+                    onClick={() => setEmailFilter({ type: "all", value: "" })}
+                  >
+                    Clear filter <X className="w-3 h-3 ml-1" />
+                  </Badge>
+                )}
+                <Button variant="outline" className="h-9 rounded-lg">Export</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/30 hover:bg-muted/30 border-b-border/50">
+                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Recipient</TableHead>
+                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email Address</TableHead>
+                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Subject</TableHead>
+                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</TableHead>
+                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Time Sent</TableHead>
+                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Details</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredEmails.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                          No emails found.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredEmails.map((email) => (
+                        <TableRow key={email.id} className="group hover:bg-muted/30 transition-colors border-b-border/50">
+                          <TableCell className="px-6 py-3.5">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-7 h-7 rounded-full">
+                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                                  {email.recipientName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="font-semibold text-sm text-foreground">{email.recipientName}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-3.5">
+                            <span className="font-mono text-xs font-medium text-muted-foreground">{email.recipientEmail}</span>
+                          </TableCell>
+                          <TableCell className="px-6 py-3.5 text-sm font-medium text-foreground">{email.subject}</TableCell>
+                          <TableCell className="px-6 py-3.5">
+                            {email.status === "sent" && <div className="flex items-center gap-1.5 text-blue-600 text-sm font-medium"><div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>Sent</div>}
+                            {email.status === "pending" && <div className="flex items-center gap-1.5 text-sky-600 text-sm font-medium"><div className="w-1.5 h-1.5 rounded-full bg-sky-500"></div>Pending</div>}
+                            {email.status === "scheduled" && <div className="flex items-center gap-1.5 text-violet-600 text-sm font-medium"><div className="w-1.5 h-1.5 rounded-full bg-violet-500"></div>Scheduled</div>}
+                            {email.status === "failed" && <div className="flex items-center gap-1.5 text-red-600 text-sm font-medium"><div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>Failed</div>}
+                          </TableCell>
+                          <TableCell className="px-6 py-3.5 text-sm text-muted-foreground">
+                            {new Date(email.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </TableCell>
+                          <TableCell className="px-6 py-3.5 text-sm text-muted-foreground">
+                            {email.reason
+                              ? <span className="text-rose-500 text-xs font-medium">{email.reason}</span>
+                              : <span className="text-xs text-muted-foreground font-medium">--</span>}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
           )}
 
         </div>
