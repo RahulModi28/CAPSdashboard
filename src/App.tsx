@@ -834,7 +834,7 @@ export default function App() {
                         </Button>
                       )}
 
-                      <Button variant="secondary" className="w-full" onClick={async () => {
+                      <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={async () => {
                         const v = volunteers.find(v => v.reg === result.reg);
                         if (v && v.partner) {
                           const recipientEmail = `${v.partner.toLowerCase().replace(/ /g, '.')}@example.com`;
