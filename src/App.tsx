@@ -362,9 +362,9 @@ export default function App() {
 
   if (showLogin) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-50 p-4">
+      <div className="flex h-screen w-full items-center justify-center p-4 text-foreground selection:bg-primary/20 selection:text-primary">
         <Toaster position="top-right" theme="light" />
-        <Card className="w-full max-w-md shadow-xl border-0">
+        <Card className="w-full max-w-md shadow-xl border-0 glass-panel">
           <CardHeader className="text-center pb-2">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Users className="w-8 h-8 text-primary" />
@@ -412,45 +412,45 @@ export default function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col h-screen w-full bg-slate-50 overflow-hidden">
+      <div className="flex flex-col h-screen w-full overflow-hidden text-foreground selection:bg-primary/20 selection:text-primary">
         <Toaster position="top-right" theme="light" />
         {/* Header */}
-        <header className="h-16 flex-shrink-0 bg-white border-b border-border flex items-center justify-between px-6 z-10 shadow-sm">
+        <header className="h-16 flex-shrink-0 glass-panel border-b border-slate-300/60 flex items-center justify-between px-6 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center premium-shadow">
               <Users className="w-4 h-4 text-primary-foreground" />
             </div>
-            <h1 className="font-semibold text-lg">Public Directory</h1>
+            <h1 className="font-semibold text-lg tracking-tight">Public Directory</h1>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setShowLogin(true)}>
+          <Button variant="outline" size="sm" onClick={() => setShowLogin(true)} className="glass-panel hover:bg-white/50 border-slate-300/60 transition-colors shadow-none font-medium">
             Admin Login
           </Button>
         </header>
 
         {/* Directory Table */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">
           <div className="max-w-6xl mx-auto">
-            <Card className="glass-panel border-0 rounded-2xl overflow-hidden shadow-sm">
-              <CardHeader className="border-b border-border/50 bg-white/50 pb-4">
-                <CardTitle className="text-lg font-semibold">Volunteer Assignments</CardTitle>
+            <Card className="glass-panel border border-slate-300/60 rounded-2xl overflow-hidden premium-shadow">
+              <CardHeader className="border-b border-slate-300/60 bg-white/20 pb-4 backdrop-blur-md">
+                <CardTitle className="text-xl font-semibold tracking-tight">Volunteer Assignments</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-muted-foreground uppercase bg-muted/30 sticky top-0">
+                    <thead className="text-xs text-muted-foreground uppercase bg-slate-200/50 backdrop-blur-md sticky top-0 border-b border-slate-300/60">
                       <tr>
-                        <th className="px-6 py-4 font-semibold">Reg ID</th>
-                        <th className="px-6 py-4 font-semibold">Name</th>
-                        <th className="px-6 py-4 font-semibold">Room</th>
-                        <th className="px-6 py-4 font-semibold">Status</th>
+                        <th className="px-6 py-4 font-semibold tracking-wider">Reg ID</th>
+                        <th className="px-6 py-4 font-semibold tracking-wider">Name</th>
+                        <th className="px-6 py-4 font-semibold tracking-wider">Room</th>
+                        <th className="px-6 py-4 font-semibold tracking-wider">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/50">
+                    <tbody className="divide-y divide-slate-300/60 bg-white/30 backdrop-blur-sm">
                       {volunteers.map((v) => (
-                        <tr key={v.reg} className="hover:bg-muted/30 transition-colors">
-                          <td className="px-6 py-4 font-mono text-muted-foreground">{v.reg}</td>
-                          <td className="px-6 py-4 font-medium">{v.name}</td>
-                          <td className="px-6 py-4 font-mono font-medium">{v.room}</td>
+                        <tr key={v.reg} className="hover:bg-white/50 transition-colors">
+                          <td className="px-6 py-4 font-mono text-slate-600">{v.reg}</td>
+                          <td className="px-6 py-4 font-medium text-foreground">{v.name}</td>
+                          <td className="px-6 py-4 font-mono font-medium text-slate-700">{v.room}</td>
                           <td className="px-6 py-4">
                             {v.keysCollected ? (
                               <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
