@@ -1134,7 +1134,7 @@ export default function App() {
                       const testRecipient = {
                         reg: "0000000", name: "Test Student", campus: "Test Campus", 
                         hostel: "CHRIST Hall Boys", room: "T-001", partner: "Test Roommate", 
-                        phone: "Not Provided", email: "test@example.com", keysCollected: false
+                        phone: "Not Provided", email: "rmodi182@gmail.com", keysCollected: false
                       };
                       const testPartner = {
                         reg: "0000001", name: "Test Roommate", campus: "Test Campus", 
@@ -1142,7 +1142,7 @@ export default function App() {
                         phone: "+91 99999 99999", email: "roommate@example.com", keysCollected: false
                       };
                       const body = generateEmailHTML(testRecipient, testPartner);
-                      const success = await sendRealEmails(['test@example.com'], 'Welcome to CAPS Leadership Training Camp 2026!', body);
+                      const success = await sendRealEmails(['rmodi182@gmail.com'], 'Welcome to CAPS Leadership Training Camp 2026!', body);
                       toast.dismiss();
                       if (success) toast.success('Connection test passed! Emails can be sent.');
                     }}
