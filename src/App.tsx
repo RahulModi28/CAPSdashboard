@@ -1131,7 +1131,18 @@ export default function App() {
                     className="glass-panel text-slate-900 border-slate-300/60" 
                     onClick={async () => {
                       toast.loading('Testing connection...');
-                      const success = await sendRealEmails(['test@example.com'], 'CAPS Email Test', '<p>This is a test connection from CAPS Dashboard.</p>');
+                      const testRecipient = {
+                        reg: "0000000", name: "Test Student", campus: "Test Campus", 
+                        hostel: "CHRIST Hall Boys", room: "T-001", partner: "Test Roommate", 
+                        phone: "Not Provided", email: "test@example.com", keysCollected: false
+                      };
+                      const testPartner = {
+                        reg: "0000001", name: "Test Roommate", campus: "Test Campus", 
+                        hostel: "CHRIST Hall Boys", room: "T-001", partner: "Test Student", 
+                        phone: "+91 99999 99999", email: "roommate@example.com", keysCollected: false
+                      };
+                      const body = generateEmailHTML(testRecipient, testPartner);
+                      const success = await sendRealEmails(['test@example.com'], 'Welcome to CAPS Leadership Training Camp 2026!', body);
                       toast.dismiss();
                       if (success) toast.success('Connection test passed! Emails can be sent.');
                     }}
