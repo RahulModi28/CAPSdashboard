@@ -982,6 +982,7 @@ export default function App() {
                           if (v) { 
                             v.keysCollected = false; 
                             setResult({...v}); 
+                            setVolunteers([...volunteers]);
                             await supabase.from('volunteers').update({ keys_collected: false }).eq('reg_no', v.reg);
                           }
                         }}>
@@ -993,6 +994,7 @@ export default function App() {
                           if (v) { 
                             v.keysCollected = true; 
                             setResult({...v}); 
+                            setVolunteers([...volunteers]);
                             await supabase.from('volunteers').update({ keys_collected: true }).eq('reg_no', v.reg);
                           }
                         }}>
