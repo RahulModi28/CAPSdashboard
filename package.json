@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm --prefix leaderboard ci && npm --prefix leaderboard run build && cp -r leaderboard/dist dist/leaderboard",
     "lint": "oxlint",
     "preview": "vite preview"
   },

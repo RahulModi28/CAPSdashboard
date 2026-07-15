@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Building2, Trees, FlaskConical, Cpu } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 // --- CONFIGURATION ---
