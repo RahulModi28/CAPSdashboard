@@ -447,7 +447,7 @@ export default function App() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           <div className="max-w-6xl mx-auto">
             <Card className="glass-panel border border-slate-300/60 rounded-2xl overflow-hidden premium-shadow">
-              <CardHeader className="border-b border-slate-300/60 bg-white/20 pb-4 backdrop-blur-md flex flex-row items-center justify-between space-y-0">
+              <CardHeader className="border-b border-slate-300/60 pb-4 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xl font-semibold tracking-tight">Volunteer Assignments</CardTitle>
                 <div className="relative w-64">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
