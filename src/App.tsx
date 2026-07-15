@@ -424,18 +424,20 @@ export default function App() {
       <div className="flex flex-col h-screen w-full overflow-hidden text-foreground selection:bg-primary/20 selection:text-primary">
         <Toaster position="top-right" theme="light" />
         {/* Header */}
-        <header className="h-16 flex-shrink-0 glass-panel border-b border-slate-300/60 flex items-center justify-between px-6 z-10">
+        <header className="h-16 flex-shrink-0 glass-panel border-b border-slate-300/60 flex items-center justify-between px-6 z-10 relative">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center premium-shadow">
               <Users className="w-4 h-4 text-primary-foreground" />
             </div>
-            <h1 className="font-semibold text-lg tracking-tight mr-4">Public Directory</h1>
-            <nav className="hidden md:flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="font-medium text-muted-foreground hover:text-foreground">Maps</Button>
-              <Button variant="ghost" size="sm" className="font-medium bg-white/20 text-foreground">Room List</Button>
-              <Button variant="ghost" size="sm" className="font-medium text-muted-foreground hover:text-foreground">Scoreboard</Button>
-            </nav>
+            <h1 className="font-semibold text-lg tracking-tight">Public Directory</h1>
           </div>
+          
+          <nav className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
+            <Button variant="ghost" className="text-base font-medium text-muted-foreground hover:text-foreground px-4">Maps</Button>
+            <Button variant="ghost" className="text-base font-medium bg-white/20 text-foreground px-4">Room List</Button>
+            <Button variant="ghost" className="text-base font-medium text-muted-foreground hover:text-foreground px-4">Scoreboard</Button>
+          </nav>
+
           <Button variant="outline" size="sm" onClick={() => setShowLogin(true)} className="glass-panel hover:bg-white/50 border-slate-300/60 transition-colors shadow-none font-medium">
             Admin Login
           </Button>
