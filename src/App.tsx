@@ -20,6 +20,7 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 
 import { type Volunteer } from "@/data/volunteers";
+import { generateEmailHTML } from "@/data/emailTemplate";
 import { type EmailEvent } from "@/data/emails";
 import {
   Chart as ChartJS,
@@ -82,7 +83,9 @@ export default function App() {
           room: v.room,
           partner: v.partner_name,
           keysCollected: v.keys_collected,
-          email: v.email
+          email: v.email,
+          hostel: v.hostel || "CHRIST Hall",
+          phone: v.phone || "Not Provided"
         }));
         setVolunteers(mappedV);
       }
@@ -992,33 +995,7 @@ export default function App() {
                         </Button>
                       )}
 
-                      <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={async () => {
-                        const v = volunteers.find(v => v.reg === result.reg);
-                        if (v && v.partner) {
-                          const recipientEmail = `${v.partner.toLowerCase().replace(/ /g, '.')}@example.com`;
-                          const subject = "Your Roommate Has Collected Keys";
-                          const body = `<p>Hello ${v.partner},</p><p>Your roommate ${v.name} has successfully collected the room keys.</p>`;
-                          
-                          const success = await sendRealEmails([recipientEmail], subject, body);
-                          
-                          if (success) {
-                            const newEmail: EmailEvent = {
-                              id: `EML-${Date.now()}`,
-                              recipientName: v.partner,
-                              recipientEmail,
-                              subject,
-                              status: "scheduled",
-                              timestamp: new Date(Date.now() + 1000 * 60 * 5).toISOString(),
-                            };
-                            setEmailsList(prev => [newEmail, ...prev]);
-                            toast.success(`Email scheduled for roommate: ${v.partner}`);
-                          }
-                        } else {
-                          toast.error("No roommate found to send an email to.");
-                        }
-                      }}>
-                        Send Roommate Email
-                      </Button>
+
                     </div>
                   </div>
                 )}
@@ -1303,32 +1280,41 @@ export default function App() {
                         
                         toast.loading(`Sending ${targets.length} emails...`);
                         
-                        // Extract emails from targets
-                        const recipientEmails = targets.map(v => `${v.name.toLowerCase().replace(/ /g, '.')}@example.com`);
-                        
-                        // Using a dummy body for the demo based on the trigger
-                        const body = `
-                          <h2>Hello CAPS Volunteer</h2>
-                          <p>This is an automated notification regarding: <strong>${broadcastTrigger}</strong></p>
-                          <br>
-                          <p>Thank you,<br>CAPS Team</p>
-                        `;
+                        // Send customized emails sequentially to avoid rate limiting
+                        let sentCount = 0;
+                        const newEmails: EmailEvent[] = [];
 
-                        const success = await sendRealEmails(recipientEmails, broadcastTrigger, body);
+                        for (const target of targets) {
+                          const recipientEmail = target.email || `${target.name.toLowerCase().replace(/ /g, '.')}@example.com`;
+                          const partnerObj = volunteers.find(p => p.name === target.partner) || {
+                            reg: "", name: target.partner, campus: target.campus, hostel: target.hostel, room: target.room, partner: target.name, phone: "Not Provided", email: "partner@example.com", keysCollected: false
+                          };
+                          
+                          const body = generateEmailHTML(target, partnerObj);
+                          const subject = "Welcome to CAPS Leadership Training Camp 2026!";
+
+                          const success = await sendRealEmails([recipientEmail], subject, body);
+                          
+                          if (success) {
+                            sentCount++;
+                            newEmails.push({
+                              id: `EML-${Date.now()}-${target.reg}`,
+                              recipientName: target.name,
+                              recipientEmail,
+                              subject,
+                              status: 'scheduled',
+                              timestamp: new Date(Date.now() + 1000 * 60 * 2).toISOString(),
+                            });
+                          }
+                        }
                         
                         toast.dismiss();
 
-                        if (success) {
-                          const newEmails: EmailEvent[] = targets.map(v => ({
-                            id: `EML-${Date.now()}-${v.reg}`,
-                            recipientName: v.name,
-                            recipientEmail: `${v.name.toLowerCase().replace(/ /g, '.')}@example.com`,
-                            subject: broadcastTrigger,
-                            status: 'scheduled',
-                            timestamp: new Date(Date.now() + 1000 * 60 * 2).toISOString(),
-                          }));
+                        if (sentCount > 0) {
                           setEmailsList(prev => [...newEmails, ...prev]);
-                          toast.success(`${newEmails.length} emails queued for ${broadcastCampus}`);
+                          toast.success(`${sentCount} emails queued for ${broadcastCampus}`);
+                        } else if (targets.length > 0) {
+                          toast.error("Failed to send emails.");
                         }
                       }}
                     >
