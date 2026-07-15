@@ -62,6 +62,8 @@ export default function App() {
   const [emailsList, setEmailsList] = useState<EmailEvent[]>([]);
   const [emailTriggers, setEmailTriggers] = useState<any[]>([]);
 
+  const [publicSearch, setPublicSearch] = useState("");
+
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -411,6 +413,13 @@ export default function App() {
   }
 
   if (!isAuthenticated) {
+    const filteredPublicVolunteers = volunteers.filter(v => 
+      (v.name && v.name.toLowerCase().includes(publicSearch.toLowerCase())) ||
+      (v.reg && v.reg.toLowerCase().includes(publicSearch.toLowerCase())) ||
+      (v.room && v.room.toLowerCase().includes(publicSearch.toLowerCase())) ||
+      (v.partner && v.partner.toLowerCase().includes(publicSearch.toLowerCase()))
+    );
+
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden text-foreground selection:bg-primary/20 selection:text-primary">
         <Toaster position="top-right" theme="light" />
@@ -420,7 +429,12 @@ export default function App() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center premium-shadow">
               <Users className="w-4 h-4 text-primary-foreground" />
             </div>
-            <h1 className="font-semibold text-lg tracking-tight">Public Directory</h1>
+            <h1 className="font-semibold text-lg tracking-tight mr-4">Public Directory</h1>
+            <nav className="hidden md:flex items-center gap-2">
+              <Button variant="ghost" size="sm" className="font-medium text-muted-foreground hover:text-foreground">Maps</Button>
+              <Button variant="ghost" size="sm" className="font-medium bg-white/20 text-foreground">Room List</Button>
+              <Button variant="ghost" size="sm" className="font-medium text-muted-foreground hover:text-foreground">Scoreboard</Button>
+            </nav>
           </div>
           <Button variant="outline" size="sm" onClick={() => setShowLogin(true)} className="glass-panel hover:bg-white/50 border-slate-300/60 transition-colors shadow-none font-medium">
             Admin Login
@@ -431,8 +445,18 @@ export default function App() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           <div className="max-w-6xl mx-auto">
             <Card className="glass-panel border border-slate-300/60 rounded-2xl overflow-hidden premium-shadow">
-              <CardHeader className="border-b border-slate-300/60 bg-white/20 pb-4 backdrop-blur-md">
+              <CardHeader className="border-b border-slate-300/60 bg-white/20 pb-4 backdrop-blur-md flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xl font-semibold tracking-tight">Volunteer Assignments</CardTitle>
+                <div className="relative w-64">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search name, reg, room..."
+                    className="pl-9 h-9 bg-white/50 border-slate-300/60 focus-visible:ring-primary/20 transition-all"
+                    value={publicSearch}
+                    onChange={(e) => setPublicSearch(e.target.value)}
+                  />
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
@@ -441,23 +465,27 @@ export default function App() {
                       <tr>
                         <th className="px-6 py-4 font-semibold tracking-wider">Reg ID</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Name</th>
+                        <th className="px-6 py-4 font-semibold tracking-wider">Roommate</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Room</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-300/60 bg-white/30 backdrop-blur-sm">
-                      {volunteers.map((v) => (
+                      {filteredPublicVolunteers.map((v) => (
                         <tr key={v.reg} className="hover:bg-white/50 transition-colors">
                           <td className="px-6 py-4 font-mono text-slate-600">{v.reg}</td>
                           <td className="px-6 py-4 font-medium text-foreground">{v.name}</td>
+                          <td className="px-6 py-4 font-medium text-muted-foreground">{v.partner || "-"}</td>
                           <td className="px-6 py-4 font-mono font-medium text-slate-700">{v.room}</td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 font-medium">
                             {v.keysCollected ? (
-                              <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                              <span className="text-green-600 flex items-center gap-1.5">
+                                <CheckCircle2 className="w-4 h-4" />
                                 Collected
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-sky-100 text-sky-700">
+                              <span className="text-muted-foreground flex items-center gap-1.5">
+                                <Clock className="w-4 h-4" />
                                 Pending
                               </span>
                             )}
