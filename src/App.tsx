@@ -472,10 +472,10 @@ export default function App() {
                     <tbody className="divide-y divide-slate-300/60 bg-white/30 backdrop-blur-sm">
                       {filteredPublicVolunteers.map((v) => (
                         <tr key={v.reg} className="hover:bg-white/50 transition-colors">
-                          <td className="px-6 py-4 font-mono text-slate-600">{v.reg}</td>
-                          <td className="px-6 py-4 font-medium text-foreground">{v.name}</td>
-                          <td className="px-6 py-4 font-medium text-muted-foreground">{v.partner || "-"}</td>
-                          <td className="px-6 py-4 font-mono font-medium text-slate-700">{v.room}</td>
+                          <td className="px-6 py-4 font-medium text-slate-700">{v.reg}</td>
+                          <td className="px-6 py-4 font-medium text-slate-700">{v.name}</td>
+                          <td className="px-6 py-4 font-medium text-slate-700">{v.partner || "-"}</td>
+                          <td className="px-6 py-4 font-medium text-slate-700">{v.room}</td>
                           <td className="px-6 py-4 font-medium">
                             {v.keysCollected ? (
                               <span className="text-green-600 flex items-center gap-1.5">
