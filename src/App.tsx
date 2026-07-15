@@ -977,18 +977,23 @@ export default function App() {
                     </div>
                     <div className="mt-4 flex flex-col gap-2">
                       {result.keysCollected ? (
-                        <Button variant="outline" className="w-full text-green-700 border-green-200 hover:bg-green-50" onClick={() => {
+                        <Button variant="outline" className="w-full text-green-700 border-green-200 hover:bg-green-50" onClick={async () => {
                           const v = volunteers.find(v => v.reg === result.reg);
-                          if (v) { v.keysCollected = false; setResult({...v}); }
+                          if (v) { 
+                            v.keysCollected = false; 
+                            setResult({...v}); 
+                            await supabase.from('volunteers').update({ keys_collected: false }).eq('reg_no', v.reg);
+                          }
                         }}>
                           Mark as Pending
                         </Button>
                       ) : (
-                        <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => {
+                        <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={async () => {
                           const v = volunteers.find(v => v.reg === result.reg);
                           if (v) { 
                             v.keysCollected = true; 
                             setResult({...v}); 
+                            await supabase.from('volunteers').update({ keys_collected: true }).eq('reg_no', v.reg);
                           }
                         }}>
                           Mark Keys Collected
