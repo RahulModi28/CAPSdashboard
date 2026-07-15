@@ -430,7 +430,7 @@ export default function App() {
           </div>
           
           <nav className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-            <Button variant="ghost" className="text-base font-medium text-muted-foreground hover:text-foreground px-4">Maps</Button>
+            <Button variant="ghost" className="text-base font-medium text-muted-foreground hover:text-foreground px-4" onClick={() => window.location.href = 'https://christ-byc-viewer.vercel.app'}>Maps</Button>
             <Button variant="ghost" className="text-base font-medium bg-white/20 text-foreground px-4">Room List</Button>
             <Button variant="ghost" className="text-base font-medium text-muted-foreground hover:text-foreground px-4" onClick={() => window.location.href = '/leaderboard'}>Scoreboard</Button>
           </nav>
