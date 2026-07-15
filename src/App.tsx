@@ -814,7 +814,7 @@ export default function App() {
                         )}
                       </div>
                     </div>
-                    <div className="mt-4">
+                    <div className="mt-4 flex flex-col gap-2">
                       {result.keysCollected ? (
                         <Button variant="outline" className="w-full text-green-700 border-green-200 hover:bg-green-50" onClick={() => {
                           const v = volunteers.find(v => v.reg === result.reg);
@@ -823,37 +823,44 @@ export default function App() {
                           Mark as Pending
                         </Button>
                       ) : (
-                        <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={async () => {
+                        <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => {
                           const v = volunteers.find(v => v.reg === result.reg);
                           if (v) { 
                             v.keysCollected = true; 
                             setResult({...v}); 
-                            // Send an email to the partner
-                            if (v.partner) {
-                              const recipientEmail = `${v.partner.toLowerCase().replace(/ /g, '.')}@example.com`;
-                              const subject = "Your Roommate Has Collected Keys";
-                              const body = `<p>Hello ${v.partner},</p><p>Your roommate ${v.name} has successfully collected the room keys.</p>`;
-                              
-                              const success = await sendRealEmails([recipientEmail], subject, body);
-                              
-                              if (success) {
-                                const newEmail: EmailEvent = {
-                                  id: `EML-${Date.now()}`,
-                                  recipientName: v.partner,
-                                  recipientEmail,
-                                  subject,
-                                  status: "scheduled",
-                                  timestamp: new Date(Date.now() + 1000 * 60 * 5).toISOString(), // scheduled for 5 mins from now
-                                };
-                                setEmailsList(prev => [newEmail, ...prev]);
-                                toast.success(`Email scheduled for roommate: ${v.partner}`);
-                              }
-                            }
                           }
                         }}>
                           Mark Keys Collected
                         </Button>
                       )}
+
+                      <Button variant="secondary" className="w-full" onClick={async () => {
+                        const v = volunteers.find(v => v.reg === result.reg);
+                        if (v && v.partner) {
+                          const recipientEmail = `${v.partner.toLowerCase().replace(/ /g, '.')}@example.com`;
+                          const subject = "Your Roommate Has Collected Keys";
+                          const body = `<p>Hello ${v.partner},</p><p>Your roommate ${v.name} has successfully collected the room keys.</p>`;
+                          
+                          const success = await sendRealEmails([recipientEmail], subject, body);
+                          
+                          if (success) {
+                            const newEmail: EmailEvent = {
+                              id: `EML-${Date.now()}`,
+                              recipientName: v.partner,
+                              recipientEmail,
+                              subject,
+                              status: "scheduled",
+                              timestamp: new Date(Date.now() + 1000 * 60 * 5).toISOString(),
+                            };
+                            setEmailsList(prev => [newEmail, ...prev]);
+                            toast.success(`Email scheduled for roommate: ${v.partner}`);
+                          }
+                        } else {
+                          toast.error("No roommate found to send an email to.");
+                        }
+                      }}>
+                        Send Roommate Email
+                      </Button>
                     </div>
                   </div>
                 )}
