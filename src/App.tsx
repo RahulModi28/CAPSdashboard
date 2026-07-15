@@ -981,6 +981,11 @@ export default function App() {
                           const v = volunteers.find(v => v.reg === result.reg);
                           if (v) { 
                             v.keysCollected = false; 
+                            const roommate = volunteers.find(r => r.name === v.partner);
+                            if (roommate) {
+                              roommate.keysCollected = false;
+                              await supabase.from('volunteers').update({ keys_collected: false }).eq('reg_no', roommate.reg);
+                            }
                             setResult({...v}); 
                             setVolunteers([...volunteers]);
                             await supabase.from('volunteers').update({ keys_collected: false }).eq('reg_no', v.reg);
@@ -993,6 +998,11 @@ export default function App() {
                           const v = volunteers.find(v => v.reg === result.reg);
                           if (v) { 
                             v.keysCollected = true; 
+                            const roommate = volunteers.find(r => r.name === v.partner);
+                            if (roommate) {
+                              roommate.keysCollected = true;
+                              await supabase.from('volunteers').update({ keys_collected: true }).eq('reg_no', roommate.reg);
+                            }
                             setResult({...v}); 
                             setVolunteers([...volunteers]);
                             await supabase.from('volunteers').update({ keys_collected: true }).eq('reg_no', v.reg);
