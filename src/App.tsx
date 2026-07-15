@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { 
   Search, Users, Building2, DoorOpen, X, 
-  LayoutDashboard, Settings, 
+  LayoutDashboard, LogOut, 
   Plus, ChevronRight, CheckCircle2, MoreVertical,
   Key, KeyRound, Mail, Clock, AlertCircle, Send
 } from "lucide-react";
@@ -61,6 +61,11 @@ export default function App() {
   const [currentView, setCurrentView] = useState<"dashboard" | "directory" | "emails" | "email-list">("dashboard");
   const [emailsList, setEmailsList] = useState<EmailEvent[]>([]);
   const [emailTriggers, setEmailTriggers] = useState<any[]>([]);
+
+  // Authentication State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -355,6 +360,121 @@ export default function App() {
     }
   };
 
+  if (showLogin) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50 p-4">
+        <Toaster position="top-right" theme="light" />
+        <Card className="w-full max-w-md shadow-xl border-0">
+          <CardHeader className="text-center pb-2">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+            <p className="text-sm text-muted-foreground">Enter your credentials to access the dashboard</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Input 
+                type="password" 
+                placeholder="Password" 
+                value={loginPassword} 
+                onChange={(e) => setLoginPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (loginPassword === "admin123") {
+                      setIsAuthenticated(true);
+                      setShowLogin(false);
+                      setLoginPassword("");
+                      toast.success("Logged in successfully");
+                    } else {
+                      toast.error("Incorrect password");
+                    }
+                  }
+                }}
+              />
+            </div>
+            <Button className="w-full" onClick={() => {
+              if (loginPassword === "admin123") {
+                setIsAuthenticated(true);
+                setShowLogin(false);
+                setLoginPassword("");
+                toast.success("Logged in successfully");
+              } else {
+                toast.error("Incorrect password");
+              }
+            }}>Login</Button>
+            <Button variant="ghost" className="w-full" onClick={() => setShowLogin(false)}>Back to Directory</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col h-screen w-full bg-slate-50 overflow-hidden">
+        <Toaster position="top-right" theme="light" />
+        {/* Header */}
+        <header className="h-16 flex-shrink-0 bg-white border-b border-border flex items-center justify-between px-6 z-10 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
+              <Users className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <h1 className="font-semibold text-lg">Public Directory</h1>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setShowLogin(true)}>
+            Admin Login
+          </Button>
+        </header>
+
+        {/* Directory Table */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-6xl mx-auto">
+            <Card className="glass-panel border-0 rounded-2xl overflow-hidden shadow-sm">
+              <CardHeader className="border-b border-border/50 bg-white/50 pb-4">
+                <CardTitle className="text-lg font-semibold">Volunteer Assignments</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-muted-foreground uppercase bg-muted/30 sticky top-0">
+                      <tr>
+                        <th className="px-6 py-4 font-semibold">Reg ID</th>
+                        <th className="px-6 py-4 font-semibold">Name</th>
+                        <th className="px-6 py-4 font-semibold">Room</th>
+                        <th className="px-6 py-4 font-semibold">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/50">
+                      {volunteers.map((v) => (
+                        <tr key={v.reg} className="hover:bg-muted/30 transition-colors">
+                          <td className="px-6 py-4 font-mono text-muted-foreground">{v.reg}</td>
+                          <td className="px-6 py-4 font-medium">{v.name}</td>
+                          <td className="px-6 py-4 font-mono font-medium">{v.room}</td>
+                          <td className="px-6 py-4">
+                            {v.keysCollected ? (
+                              <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                Collected
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-sky-100 text-sky-700">
+                                Pending
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen w-full overflow-hidden text-foreground selection:bg-primary/20 selection:text-primary">
       <Toaster position="top-right" theme="light" />
@@ -381,8 +501,15 @@ export default function App() {
           </nav>
         </div>
         <div className="flex flex-col items-center gap-6">
-          <button className="text-muted-foreground hover:text-foreground hover:bg-muted p-2.5 rounded-xl transition-colors">
-            <Settings className="w-5 h-5" />
+          <button 
+            className="text-muted-foreground hover:text-red-500 hover:bg-red-50 p-2.5 rounded-xl transition-colors"
+            onClick={() => {
+              setIsAuthenticated(false);
+              toast.info("Logged out successfully");
+            }}
+            title="Logout"
+          >
+            <LogOut className="w-5 h-5 text-red-400" />
           </button>
           <Avatar className="w-9 h-9 border border-border">
             <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">AD</AvatarFallback>
