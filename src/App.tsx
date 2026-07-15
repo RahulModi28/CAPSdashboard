@@ -788,22 +788,26 @@ export default function App() {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="font-semibold text-foreground text-lg">{result.name}</h3>
+                        <h3 className="font-semibold text-foreground text-lg">
+                          {result.name && result.name.length > 15 ? result.name.split(' ')[0] : result.name}
+                        </h3>
                         <p className="text-xs font-mono text-muted-foreground">{result.reg}</p>
                       </div>
                     </div>
                     <div className="space-y-3 bg-muted/30 p-4 rounded-xl border border-border/50">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Campus</span>
-                        <span className="font-medium">{result.campus}</span>
+                      <div className="flex justify-between items-start gap-4 text-sm">
+                        <span className="text-muted-foreground shrink-0">Campus</span>
+                        <span className="font-medium text-right">{result.campus}</span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Room</span>
-                        <span className="font-medium font-mono">{result.room}</span>
+                      <div className="flex justify-between items-start gap-4 text-sm">
+                        <span className="text-muted-foreground shrink-0">Room</span>
+                        <span className="font-medium font-mono text-right">{result.room}</span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Roommate</span>
-                        <span className="font-medium">{result.partner}</span>
+                      <div className="flex justify-between items-start gap-4 text-sm">
+                        <span className="text-muted-foreground shrink-0">Roommate</span>
+                        <span className="font-medium text-right">
+                          {result.partner && result.partner.length > 12 ? result.partner.split(' ')[0] : result.partner}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm items-center">
                         <span className="text-muted-foreground">Key Status</span>
