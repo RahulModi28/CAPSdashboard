@@ -426,10 +426,7 @@ export default function App() {
         {/* Header */}
         <header className="h-16 flex-shrink-0 glass-panel border-b border-slate-300/60 flex items-center justify-between px-6 z-10 relative">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center premium-shadow">
-              <Users className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <h1 className="font-semibold text-lg tracking-tight">Public Directory</h1>
+            <img src={logo} alt="CAPS Logo" className="h-10 w-auto" />
           </div>
           
           <nav className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
@@ -448,7 +445,7 @@ export default function App() {
           <div className="max-w-6xl mx-auto">
             <Card className="glass-panel border border-slate-300/60 rounded-2xl overflow-hidden premium-shadow">
               <CardHeader className="border-b border-slate-300/60 pb-4 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-xl font-semibold tracking-tight">Volunteer Assignments</CardTitle>
+                <CardTitle className="text-xl font-semibold tracking-tight">Room Allocation</CardTitle>
                 <div className="relative w-64">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
