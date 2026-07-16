@@ -131,7 +131,7 @@ export default function App() {
         }
       })();
 
-      const minLoadingTime = new Promise(resolve => setTimeout(resolve, data.length === 0 ? 2500 : 0));
+      const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2500));
       const [json] = await Promise.all([fetchPromise, minLoadingTime]);
       
       if (json) {
@@ -163,24 +163,24 @@ export default function App() {
   return (
     <div className="font-harry-body antialiased min-h-screen flex flex-col items-center hp-bg overflow-auto selection:bg-[#D3A625]/30 text-white pb-12">
       
-      <main className="relative z-10 w-full h-full max-w-[1440px] px-8 sm:px-12 flex flex-col items-center justify-start py-8 sm:py-16">
+      <main className="relative z-10 w-full h-full max-w-[1440px] px-8 sm:px-12 flex flex-col items-center justify-start py-4 sm:py-8">
         
         {/* Header */}
-        <header className="text-center mb-12 sm:mb-20 w-full">
-          <div className="flex justify-between items-center w-full max-w-6xl mx-auto mb-12">
-             <div className="text-[#D3A625] font-harry-title text-sm tracking-widest cursor-pointer hover:text-white transition-colors">
-               ← Back to the Sorting Ceremony
-             </div>
-             <button onClick={fetchData} className="text-[#D3A625] font-harry-title text-sm tracking-widest border border-[#D3A625] px-6 py-2 rounded hover:bg-[#D3A625]/10 transition-colors bg-transparent">
+        <header className="text-center mb-6 sm:mb-10 w-full">
+          <div className="flex justify-between items-center w-full max-w-6xl mx-auto mb-6">
+             <a href="https://rahulmodi28.github.io/CAPSdashboard/" className="text-[#D3A625] font-harry-title text-sm tracking-widest cursor-pointer hover:text-white transition-colors">
+               ← Back to the landing page
+             </a>
+             <button onClick={() => fetchData()} className="text-[#D3A625] font-harry-title text-sm tracking-widest border border-[#D3A625] px-6 py-2 rounded hover:bg-[#D3A625]/10 transition-colors bg-transparent">
                REFRESH
              </button>
           </div>
-          <span className="font-harry-title text-[#D3A625] tracking-[0.4em] uppercase text-sm mb-4 block">The Great Hall Ledger</span>
-          <h1 className="font-harry-title text-4xl sm:text-6xl md:text-7xl font-bold mb-6 gold-glow-text">HOUSE POINTS SCOREBOARD</h1>
-          <p className="font-harry-body italic text-white/80 text-lg md:text-xl">"Points shall be awarded to the deserving, and taken from those who transgress."</p>
+          <span className="font-harry-title text-[#D3A625] tracking-[0.4em] uppercase text-sm mb-2 block">The Great Hall Ledger</span>
+          <h1 className="font-harry-title text-4xl sm:text-5xl md:text-6xl font-bold mb-4 gold-glow-text">HOUSE POINTS SCOREBOARD</h1>
+          <p className="font-harry-body italic text-white/80 text-base md:text-lg">"Points shall be awarded to the deserving, and taken from those who transgress."</p>
         </header>
 
-        {loading && data.length === 0 ? (
+        {loading ? (
           <SortingHatLoader />
         ) : (
           <div className="flex flex-col items-center w-full max-w-6xl gap-16">
