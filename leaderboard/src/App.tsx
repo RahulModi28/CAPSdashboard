@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, Lock, Eye, CheckCircle2 } from "lucide-react";
+import { supabase } from "./supabaseClient";
 
 import gryffindorImg from "./assets/harry/gryffindor.png";
 import slytherinImg from "./assets/harry/slytherin.png";
@@ -9,7 +10,6 @@ import hufflepuffImg from "./assets/harry/hufflepuff.png";
 import sortingHatImg from "./assets/harry/sorting-hat.png";
 import hedwigsTheme from "./assets/harry/hedwigs-theme.mp4";
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwowLefJyyH_frLuVJsEvcRfNq-8UPUmsPMp-QeLws83-GwRO0aRK7X2goD2Socn7qjTQ/exec"; 
 const ADMIN_PASSWORD = "lumos";
 
 type AppState = "LOCKED" | "ADMIN" | "REVEAL" | "LEADERBOARD";
@@ -48,28 +48,19 @@ export default function App() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(APPS_SCRIPT_URL);
-      const json = await response.json();
+      const { data: lbData, error: lbError } = await supabase.from("leaderboard").select("*");
+      const { data: stateData, error: stateError } = await supabase.from("ceremony_state").select("*").eq("id", 1).single();
 
-      let isUnlocked = false;
-      let newAssignments = DEFAULT_ASSIGNMENTS;
-      let newScores: CampusData[] = [];
+      if (lbError) throw lbError;
+      if (stateError) throw stateError;
 
-      // Check if it's the old array format or the new object format
-      if (Array.isArray(json)) {
-        newScores = json.map((row: any) => ({
-          campus: row.campus || row[0],
-          points: parseInt(row.points || row[1], 10) || 0
-        }));
-        // If it's the old script, just assume it's unlocked so it still works
-        isUnlocked = true; 
-      } else {
-        newScores = (json.scores || []).filter((row: any) => row.campus && String(row.campus).trim() !== "");
-        isUnlocked = json.isUnlocked === true;
-        if (json.assignments) newAssignments = json.assignments;
-      }
+      const newScores = (lbData || [])
+        .filter((row: any) => row.campus && String(row.campus).trim() !== "")
+        .sort((a, b) => b.points - a.points);
+      
+      const isUnlocked = stateData.is_unlocked === true;
+      const newAssignments = stateData.assignments || DEFAULT_ASSIGNMENTS;
 
-      newScores.sort((a, b) => b.points - a.points);
       setData(newScores);
       setAssignments(newAssignments);
 
@@ -92,11 +83,24 @@ export default function App() {
     }
   };
 
-  // Poll server every 5 seconds
   useEffect(() => {
     fetchData(); // initial fetch
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
+
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public' },
+        (payload) => {
+          console.log('Realtime update:', payload);
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
@@ -125,13 +129,13 @@ export default function App() {
           )}
           {appState === "REVEAL" && <RevealScreen key="reveal" assignments={assignments} />}
           {appState === "LEADERBOARD" && (
-            <LeaderboardScreen 
-              key="leaderboard" 
-              data={data} 
-              assignments={assignments} 
-              loading={loading}
-              onRefresh={fetchData}
-            />
+             <LeaderboardScreen 
+               key="leaderboard" 
+               data={data} 
+               assignments={assignments} 
+               loading={loading}
+               onRefresh={fetchData}
+             />
           )}
         </AnimatePresence>
       </main>
@@ -184,17 +188,18 @@ function LockScreen({ onAdminAccess }: { onAdminAccess: () => void }) {
 function AdminPanel({ currentAssignments, data, onBroadcast }: { currentAssignments: HouseAssignment, data: any[], onBroadcast: () => void }) {
   const [assignments, setAssignments] = useState<HouseAssignment>(currentAssignments);
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
-  const campuses = data.length > 0 ? data.map(d => d.campus) : ["BCC", "BKC", "BRC", "BYC"];
   const houses = ["Gryffindor", "Slytherin", "Ravenclaw", "Hufflepuff"];
 
   const handleBroadcast = async () => {
     setStatus("sending");
     try {
-      const params = new URLSearchParams({
-        action: "unlock",
-        assignments: JSON.stringify(assignments)
-      });
-      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+      const { error } = await supabase
+        .from('ceremony_state')
+        .update({ is_unlocked: true, assignments: assignments })
+        .eq('id', 1);
+
+      if (error) throw error;
+      
       setStatus("done");
       onBroadcast();
     } catch (error) {
@@ -204,19 +209,32 @@ function AdminPanel({ currentAssignments, data, onBroadcast }: { currentAssignme
     }
   };
 
+  const updatePoints = async (campus: string, newPoints: number) => {
+    try {
+      await supabase.from('leaderboard').update({ points: newPoints }).eq('campus', campus);
+    } catch (error) {
+      console.error("Failed to update points:", error);
+    }
+  };
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full max-w-2xl bg-black/80 p-8 rounded-xl border border-[#D3A625]/50">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full max-w-4xl bg-black/80 p-8 rounded-xl border border-[#D3A625]/50">
       <h1 className="font-harry-title text-5xl mb-2 gold-glow-text">Admin: Sorting Ceremony</h1>
-      <p className="text-white/70 italic mb-8 text-center">Assign the houses below. When ready, click Broadcast to unlock the screens of everyone in the audience!</p>
+      <p className="text-white/70 italic mb-8 text-center">Update points and assign the houses below. When ready, click Broadcast to unlock the screens of everyone in the audience!</p>
       
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-        {campuses.map(campus => (
-          <div key={campus} className="flex flex-col items-center bg-white/5 p-4 rounded-lg border border-white/10">
-            <span className="font-harry-title text-3xl text-white mb-4">{campus}</span>
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        {data.map(item => (
+          <div key={item.campus} className="flex flex-col items-center bg-white/5 p-4 rounded-lg border border-white/10">
+            <span className="font-harry-title text-4xl text-white mb-2">{item.campus}</span>
+            <div className="flex items-center gap-4 mb-4">
+              <button onClick={() => updatePoints(item.campus, item.points - 10)} className="text-2xl font-bold bg-red-900/50 hover:bg-red-800 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors">-10</button>
+              <span className="text-3xl font-bold text-[#D3A625] w-20 text-center">{item.points}</span>
+              <button onClick={() => updatePoints(item.campus, item.points + 10)} className="text-2xl font-bold bg-green-900/50 hover:bg-green-800 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors">+10</button>
+            </div>
             <select 
-              className="bg-black border border-[#D3A625] text-[#D3A625] text-xl p-2 rounded focus:outline-none w-full text-center"
-              value={assignments[campus]}
-              onChange={(e) => setAssignments({ ...assignments, [campus]: e.target.value })}
+              className="bg-black border border-[#D3A625] text-[#D3A625] text-xl p-2 rounded focus:outline-none w-full text-center mt-2"
+              value={assignments[item.campus] || "Ravenclaw"}
+              onChange={(e) => setAssignments({ ...assignments, [item.campus]: e.target.value })}
             >
               {houses.map(house => (
                 <option key={house} value={house}>{house}</option>
@@ -247,7 +265,7 @@ function RevealScreen({ assignments }: { assignments: HouseAssignment }) {
       <h1 className="font-harry-title text-5xl sm:text-7xl mb-16 gold-glow-text text-center animate-pulse">The Sorting Ceremony Begins...</h1>
       <div className="flex flex-wrap justify-center gap-12 md:gap-24 w-full max-w-6xl">
         {entries.map(([campus, houseName], index) => {
-          const house = HOUSES[houseName];
+          const house = HOUSES[houseName] || HOUSES["Ravenclaw"];
           return (
             <motion.div 
               key={campus}
