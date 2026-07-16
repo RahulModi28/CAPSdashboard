@@ -189,7 +189,7 @@ export default function App() {
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8 items-stretch justify-items-center mt-8">
               {sortedData.slice(0, 4).map((item, index) => (
                 <div key={item.campus} className="flex justify-center w-full h-full">
-                  <HouseCard rank={index + 1} data={item} isWinner={index === 0} />
+                  <HouseCard rank={index + 1} data={item} />
                 </div>
               ))}
             </div>
@@ -204,12 +204,10 @@ export default function App() {
 // House Card Component
 function HouseCard({ 
   rank, 
-  data,
-  isWinner = false
+  data
 }: { 
   rank: number, 
-  data: CampusData, 
-  isWinner?: boolean
+  data: CampusData
 }) {
   if (!data) return null;
   const info = CAMPUS_MAP[data.campus] || { label: data.campus, quote: "Unknown", iconUrl: "", cssClass: "house-ravenclaw" };
