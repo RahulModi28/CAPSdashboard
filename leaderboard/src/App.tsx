@@ -9,7 +9,7 @@ import hufflepuffImg from "./assets/harry/hufflepuff.png";
 import sortingHatImg from "./assets/harry/sorting-hat.png";
 import hedwigsTheme from "./assets/harry/hedwigs-theme.mp4";
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxviV3javW-XwcUt80JKY8sDxv4xNTKvDijyL29yGF6n5Wl8no9VXOt-6aUfHLD7thr-Q/exec"; 
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwowLefJyyH_frLuVJsEvcRfNq-8UPUmsPMp-QeLws83-GwRO0aRK7X2goD2Socn7qjTQ/exec"; 
 const ADMIN_PASSWORD = "lumos";
 
 type AppState = "LOCKED" | "ADMIN" | "REVEAL" | "LEADERBOARD";
