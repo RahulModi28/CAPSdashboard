@@ -115,7 +115,14 @@ export default function App() {
       <main className="relative z-10 w-full h-full max-w-[1440px] px-8 sm:px-12 flex flex-col items-center justify-center py-4 sm:py-8 min-h-screen">
         <AnimatePresence mode="wait">
           {appState === "LOCKED" && <LockScreen key="lock" onAdminAccess={() => setAppState("ADMIN")} />}
-          {appState === "ADMIN" && <AdminPanel key="admin" currentAssignments={assignments} onBroadcast={() => setTimeout(fetchData, 1000)} />}
+          {appState === "ADMIN" && (
+            <AdminPanel 
+              key="admin" 
+              currentAssignments={assignments} 
+              data={data} 
+              onBroadcast={() => setTimeout(fetchData, 1000)} 
+            />
+          )}
           {appState === "REVEAL" && <RevealScreen key="reveal" assignments={assignments} />}
           {appState === "LEADERBOARD" && (
             <LeaderboardScreen 
@@ -174,10 +181,10 @@ function LockScreen({ onAdminAccess }: { onAdminAccess: () => void }) {
   );
 }
 
-function AdminPanel({ currentAssignments, onBroadcast }: { currentAssignments: HouseAssignment, onBroadcast: () => void }) {
+function AdminPanel({ currentAssignments, data, onBroadcast }: { currentAssignments: HouseAssignment, data: any[], onBroadcast: () => void }) {
   const [assignments, setAssignments] = useState<HouseAssignment>(currentAssignments);
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
-  const campuses = ["BCC", "BKC", "BRC", "BYC"];
+  const campuses = data.length > 0 ? data.map(d => d.campus) : ["BCC", "BKC", "BRC", "BYC"];
   const houses = ["Gryffindor", "Slytherin", "Ravenclaw", "Hufflepuff"];
 
   const handleBroadcast = async () => {
