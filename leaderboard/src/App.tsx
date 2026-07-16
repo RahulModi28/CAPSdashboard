@@ -37,6 +37,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const isInitialLoad = useRef(true);
 
   const toggleMusic = () => {
     if (audioRef.current) {
@@ -66,14 +67,20 @@ export default function App() {
 
       // Transition states based on server lock status
       setAppState((current) => {
-        if (current === "LOCKED" && isUnlocked) {
-          setTimeout(() => setAppState("LEADERBOARD"), 8000); 
-          return "REVEAL";
+        if (current === "LOCKED" && isUnlocked && !isInitialLoad.current) {
+          const hasSeen = localStorage.getItem("hasSeenCeremony");
+          if (!hasSeen) {
+            localStorage.setItem("hasSeenCeremony", "true");
+            setTimeout(() => setAppState("LEADERBOARD"), 8000); 
+            return "REVEAL";
+          }
         }
         if (current === "REVEAL") return current; 
         if (current === "ADMIN") return current; 
         return isUnlocked ? "LEADERBOARD" : "LOCKED";
       });
+
+      isInitialLoad.current = false;
 
     } catch (error) {
       console.error("Error fetching data:", error);
