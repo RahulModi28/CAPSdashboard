@@ -389,9 +389,9 @@ function LeaderboardScreen({ data, assignments, loading }: any) {
         <div className="flex flex-col items-center w-full max-w-6xl gap-16">
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8 items-stretch justify-items-center mt-8">
             {data.slice(0, 4).map((item: any, index: number) => (
-              <div key={item.campus} className="flex justify-center w-full h-full">
+              <motion.div layout key={item.campus} className="flex justify-center w-full h-full" transition={{ type: "spring", stiffness: 200, damping: 20 }}>
                 <HouseCard rank={index + 1} data={item} houseName={assignments[item.campus]} />
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -407,6 +407,7 @@ function HouseCard({ rank, data, houseName }: any) {
 
   return (
     <motion.div 
+      layout
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: rank * 0.1, type: "spring", stiffness: 100, damping: 20 }}
