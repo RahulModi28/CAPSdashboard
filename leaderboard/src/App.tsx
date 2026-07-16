@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 import gryffindorImg from "./assets/harry/gryffindor.png";
@@ -6,6 +6,7 @@ import slytherinImg from "./assets/harry/slytherin.png";
 import ravenclawImg from "./assets/harry/ravenclaw.png";
 import hufflepuffImg from "./assets/harry/hufflepuff.png";
 import sortingHatImg from "./assets/harry/sorting-hat.png";
+import hedwigsTheme from "./assets/harry/hedwigs-theme.mp4";
 
 // --- CONFIGURATION ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxviV3javW-XwcUt80JKY8sDxv4xNTKvDijyL29yGF6n5Wl8no9VXOt-6aUfHLD7thr-Q/exec"; 
@@ -112,6 +113,19 @@ const SortingHatLoader = () => {
 export default function App() {
   const [data, setData] = useState<CampusData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -162,7 +176,17 @@ export default function App() {
 
   return (
     <div className="font-harry-body antialiased min-h-screen flex flex-col items-center hp-bg overflow-auto selection:bg-[#D3A625]/30 text-white pb-12">
+      <audio ref={audioRef} src={hedwigsTheme} loop />
       
+      {/* Floating Music Button */}
+      <button 
+        onClick={toggleMusic}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-black/70 border border-[#D3A625]/50 flex items-center justify-center text-2xl hover:bg-[#D3A625]/30 hover:scale-110 transition-all backdrop-blur-md shadow-[0_0_15px_rgba(211,166,37,0.3)]"
+        title={isPlaying ? "Pause Music" : "Play Music"}
+      >
+        {isPlaying ? "⏸️" : "🎵"}
+      </button>
+
       <main className="relative z-10 w-full h-full max-w-[1440px] px-8 sm:px-12 flex flex-col items-center justify-start py-4 sm:py-8">
         
         {/* Header */}
