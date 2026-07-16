@@ -12,7 +12,7 @@ import hedwigsTheme from "./assets/harry/hedwigs-theme.mp4";
 
 const ADMIN_PASSWORD = "lumos";
 
-type AppState = "LOCKED" | "ADMIN" | "REVEAL" | "LEADERBOARD";
+type AppState = "LOADING" | "LOCKED" | "ADMIN" | "REVEAL" | "LEADERBOARD";
 type CampusData = { campus: string; points: number };
 type HouseAssignment = Record<string, string>;
 
@@ -31,7 +31,7 @@ const HOUSES: Record<string, { quote: string; iconUrl: string; cssClass: string 
 };
 
 export default function App() {
-  const [appState, setAppState] = useState<AppState>("LOCKED");
+  const [appState, setAppState] = useState<AppState>("LOADING");
   const [data, setData] = useState<CampusData[]>([]);
   const [assignments, setAssignments] = useState<HouseAssignment>(DEFAULT_ASSIGNMENTS);
   const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ export default function App() {
 
       // Transition states based on server lock status
       setAppState((current) => {
-        if (current === "LOCKED" && isUnlocked && !isInitialLoad.current) {
+        if ((current === "LOCKED" || current === "LOADING") && isUnlocked && !isInitialLoad.current) {
           const hasSeen = localStorage.getItem("hasSeenCeremony");
           if (!hasSeen) {
             localStorage.setItem("hasSeenCeremony", "true");
@@ -124,6 +124,11 @@ export default function App() {
 
       <main className="relative z-10 w-full h-full max-w-[1440px] px-8 sm:px-12 flex flex-col items-center justify-center py-4 sm:py-8 min-h-screen">
         <AnimatePresence mode="wait">
+          {appState === "LOADING" && (
+            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center justify-center min-h-[60vh]">
+               <SortingHatLoader />
+            </motion.div>
+          )}
           {appState === "LOCKED" && <LockScreen key="lock" onAdminAccess={() => setAppState("ADMIN")} />}
           {appState === "ADMIN" && (
             <AdminPanel 
