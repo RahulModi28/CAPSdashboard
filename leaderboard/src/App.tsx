@@ -157,7 +157,11 @@ export default function App() {
       const [json] = await Promise.all([fetchPromise, minLoadingTime]);
       
       if (json) {
-        setData(json);
+        const remappedData = json.map((item: any) => ({
+          ...item,
+          campus: item.campus === "BMC" ? "BCC" : item.campus
+        }));
+        setData(remappedData);
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
@@ -198,42 +202,18 @@ export default function App() {
           <SparkOfKnowledgeLoader />
         ) : (
           <>
-            {/* Holographic Podium */}
-            <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 items-end mb-8 sm:mb-12">
-              
-              {/* Rank 2 (Left) */}
-              <PodiumColumn 
-                rank={2} 
-                data={sortedData[1]} 
-                heightClass="h-56" 
-                beamClass="blue-beam"
-                delay={0.2}
-              />
-              
-              {/* Rank 1 (Center) */}
-              <PodiumColumn 
-                rank={1} 
-                data={sortedData[0]} 
-                heightClass="h-80" 
-                beamClass="gold-beam"
-                glowTopClass="gold-glow-top"
-                delay={0.1}
-                isCenter={true}
-              />
-              
-              {/* Rank 3 (Right) */}
-              <PodiumColumn 
-                rank={3} 
-                data={sortedData[2]} 
-                heightClass="h-44" 
-                beamClass="blue-beam"
-                delay={0.3}
-                animationDelay="2.5s"
-              />
+            {/* Dynamic Bar Chart Podium */}
+            <div className="w-full max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 items-end mb-8 sm:mb-12">
+              {sortedData.slice(0, 4).map((item, index) => (
+                <PodiumColumn
+                  key={item.campus}
+                  rank={index + 1}
+                  data={item}
+                  maxPoints={sortedData[0].points}
+                  delay={0.1 * index}
+                />
+              ))}
             </div>
-
-            {/* Challenger Section (Rank 4) */}
-            <ChallengerCard rank={4} data={sortedData[3]} />
           </>
         )}
 
@@ -248,24 +228,24 @@ export default function App() {
 function PodiumColumn({ 
   rank, 
   data, 
-  heightClass, 
-  beamClass, 
-  glowTopClass = "",
-  delay,
-  animationDelay = "1s",
-  isCenter = false
+  maxPoints,
+  delay
 }: { 
   rank: number, 
   data: CampusData, 
-  heightClass: string, 
-  beamClass: string,
-  glowTopClass?: string,
-  delay: number,
-  animationDelay?: string,
-  isCenter?: boolean
+  maxPoints: number,
+  delay: number
 }) {
   if (!data) return null;
   const info = CAMPUS_MAP[data.campus] || { label: data.campus, theme: "Unknown", icon: <Building2 className="w-10 h-10" />, color: "hsl(var(--primary))", gradient: "from-primary to-primary/50" };
+
+  const isCenter = rank === 1;
+  const heightRatio = maxPoints > 0 ? data.points / maxPoints : 0;
+  // Dynamic height between 140px and 360px based on points relative to the winner
+  const barHeight = Math.max(140, heightRatio * 360);
+  const beamClass = rank === 1 ? "gold-beam" : "blue-beam";
+  const glowTopClass = rank === 1 ? "gold-glow-top" : "";
+  const animationDelay = `${rank * 0.5}s`;
 
   return (
     <motion.div 
@@ -273,10 +253,10 @@ function PodiumColumn({
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, type: "spring", stiffness: 100, damping: 20 }}
-      className={`flex flex-col items-center ${isCenter ? 'order-first md:order-none' : ''}`}
+      className={`flex flex-col items-center`}
     >
       <div className={`mb-${isCenter ? '10' : '8'} flex flex-col items-center text-center`}>
-        <div className={`w-${isCenter ? '28 h-28' : '20 h-20'} rounded-full border border-primary/20 p-2 sm:p-4 mb-${isCenter ? '6' : '4'} relative bg-white/5 flex items-center justify-center text-white backdrop-blur-md`}>
+        <div className={`w-${isCenter ? '28 h-28' : '20 h-20'} rounded-full border border-primary/20 p-2 sm:p-4 mb-${isCenter ? '6' : '4'} relative bg-white/5 flex items-center justify-center text-white backdrop-blur-md transition-all duration-500`}>
           {info.icon}
           {isCenter && (
             <div className="absolute -top-3 -right-3 w-10 h-10 bg-secondary rounded-full flex items-center justify-center shadow-2xl border border-white/20">
@@ -284,16 +264,21 @@ function PodiumColumn({
             </div>
           )}
         </div>
-        <h3 className={`${isCenter ? 'font-headline-lg text-headline-lg text-white' : 'font-headline-md text-headline-md text-white/90'}`}>
+        <h3 className={`${isCenter ? 'font-headline-lg text-headline-lg text-white' : 'font-headline-md text-headline-md text-white/90'} transition-all duration-500`}>
           {info.label.replace(" Campus", "")}
         </h3>
       </div>
 
-      <div className={`holographic-pillar ${beamClass} w-full ${heightClass} rounded-t-${isCenter ? '2xl' : 'xl'} flex flex-col items-center pt-${isCenter ? '12' : '8'}`}>
+      <motion.div 
+        className={`holographic-pillar ${beamClass} w-full rounded-t-xl flex flex-col items-center pt-8 overflow-hidden`}
+        initial={{ height: 100 }}
+        animate={{ height: barHeight }}
+        transition={{ type: "spring", stiffness: 50, damping: 15 }}
+      >
         <div className={`pillar-glow-top ${glowTopClass}`}></div>
         <div className="light-stream" style={{ animationDelay }}></div>
         <span className={`font-display-lg ${isCenter ? 'text-display-lg text-secondary/30 mb-4' : 'text-headline-lg text-white/20 mb-2'}`}>
-          {rank}{rank === 1 ? 'st' : rank === 2 ? 'nd' : 'rd'}
+          {rank}{rank === 1 ? 'st' : rank === 2 ? 'nd' : rank === 3 ? 'rd' : 'th'}
         </span>
         <div className={`text-white ${isCenter ? 'font-display-lg text-display-lg drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'font-headline-lg text-headline-lg tracking-tight'}`}>
           <AnimatedNumber value={data.points} />
@@ -301,48 +286,8 @@ function PodiumColumn({
         <div className={`${isCenter ? 'text-secondary/60 font-label-md text-label-md mt-2' : 'text-white/40 font-label-sm text-label-sm mt-1'} uppercase ${isCenter ? 'tracking-widest' : 'tracking-tighter'}`}>
           {isCenter ? 'Points' : 'Pts'}
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
 
-// Challenger Card Component
-function ChallengerCard({ rank, data }: { rank: number, data: CampusData }) {
-  if (!data) return null;
-  const info = CAMPUS_MAP[data.campus] || { label: data.campus, theme: "Unknown", icon: <Building2 className="w-6 h-6" />, color: "hsl(var(--primary))", gradient: "from-primary to-primary/50" };
-
-  return (
-    <motion.div 
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 24 }}
-      className="w-full max-w-4xl"
-    >
-      <div className="challenger-pulse bg-white/[0.03] border border-white/10 rounded-full px-8 py-4 sm:px-12 sm:py-6 flex flex-col sm:flex-row items-center justify-between group hover:border-primary/40 transition-all duration-500 backdrop-blur-sm gap-4 sm:gap-0">
-        <div className="flex items-center gap-6 sm:gap-10">
-          <div className="flex flex-col items-center">
-            <span className="font-label-sm text-label-sm text-primary/50 uppercase">Rank</span>
-            <span className="font-display-lg text-headline-md text-white">0{rank}</span>
-          </div>
-          <div className="h-12 w-[1px] bg-white/10 hidden sm:block"></div>
-          <div className="flex items-center gap-4 sm:gap-6">
-            <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white bg-white/5">
-              {info.icon}
-            </div>
-            <div>
-              <h4 className="font-headline-md text-headline-md text-white/90">{info.label}</h4>
-              <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest text-[10px]">Challenger Class</p>
-            </div>
-          </div>
-        </div>
-        <div className="text-center sm:text-right">
-          <div className="font-display-lg text-headline-lg text-white tracking-tighter">
-            <AnimatedNumber value={data.points} />
-          </div>
-          <p className="font-label-sm text-label-sm text-primary/40 uppercase tracking-[0.2em] text-[10px]">Current Rating</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
