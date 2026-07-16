@@ -321,7 +321,7 @@ function LeaderboardScreen({ data, assignments, loading }: any) {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full">
       <header className="text-center mb-6 sm:mb-10 w-full relative">
         <div className="flex justify-between items-center w-full max-w-6xl mx-auto mb-6">
-           <a href="https://rahulmodi28.github.io/CAPSdashboard/" className="text-[#D3A625] font-harry-title text-sm tracking-widest cursor-pointer hover:text-white transition-colors z-20">
+           <a href="https://caps-landing-page.vercel.app" className="text-[#D3A625] font-harry-title text-sm tracking-widest cursor-pointer hover:text-white transition-colors z-20">
              ← Back to the landing page
            </a>
            <div className="flex gap-4 z-20">
