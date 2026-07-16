@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { Play, Pause } from "lucide-react";
 
 import gryffindorImg from "./assets/harry/gryffindor.png";
 import slytherinImg from "./assets/harry/slytherin.png";
@@ -181,10 +182,10 @@ export default function App() {
       {/* Floating Music Button */}
       <button 
         onClick={toggleMusic}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-black/70 border border-[#D3A625]/50 flex items-center justify-center text-2xl hover:bg-[#D3A625]/30 hover:scale-110 transition-all backdrop-blur-md shadow-[0_0_15px_rgba(211,166,37,0.3)]"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-black/70 border border-[#D3A625]/50 flex items-center justify-center hover:bg-[#D3A625]/30 hover:scale-110 transition-all backdrop-blur-md shadow-[0_0_15px_rgba(211,166,37,0.3)] text-[#D3A625]"
         title={isPlaying ? "Pause Music" : "Play Music"}
       >
-        {isPlaying ? "⏸️" : "🎵"}
+        {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
       </button>
 
       <main className="relative z-10 w-full h-full max-w-[1440px] px-8 sm:px-12 flex flex-col items-center justify-start py-4 sm:py-8">
