@@ -9,29 +9,29 @@ type CampusData = {
   points: number;
 };
 
-const CAMPUS_MAP: Record<string, { label: string; quote: string; icon: string; cssClass: string; }> = {
+const CAMPUS_MAP: Record<string, { label: string; quote: string; iconUrl: string; cssClass: string; }> = {
   BCC: { 
     label: "BCC",
     quote: '"Bold of heart, fierce of will"', 
-    icon: "🦁",
+    iconUrl: "/harry/gryffindor.png",
     cssClass: "house-gryffindor"
   },
   BKC: { 
     label: "BKC", 
     quote: '"Cunning, ambitious, unyielding"',
-    icon: "🐍",
+    iconUrl: "/harry/slytherin.png",
     cssClass: "house-slytherin"
   },
   BRC: { 
     label: "BRC", 
     quote: '"Wit beyond measure"',
-    icon: "🦅",
+    iconUrl: "/harry/ravenclaw.png",
     cssClass: "house-ravenclaw"
   },
   BYC: { 
     label: "BYC", 
     quote: '"Just and loyal"',
-    icon: "🦡",
+    iconUrl: "/harry/hufflepuff.png",
     cssClass: "house-hufflepuff"
   },
 };
@@ -84,12 +84,11 @@ const SortingHatLoader = () => {
         className="relative w-full h-full flex flex-col items-center justify-center gap-6"
       >
         <motion.div 
-          className="text-6xl"
           initial={{ rotate: -10, y: 0 }}
           animate={{ rotate: 10, y: -10 }}
           transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
         >
-          🎩
+          <img src="/harry/sorting-hat.png" alt="Sorting Hat" className="w-32 h-32 object-contain drop-shadow-2xl" />
         </motion.div>
         <motion.div 
           className="text-[#D3A625] font-harry-title text-xl uppercase tracking-widest font-bold"
@@ -209,7 +208,7 @@ export default function App() {
                   <div key={item.campus} className="flex justify-between items-center py-4 border-b border-white/10 last:border-0">
                     <div className="flex items-center gap-6">
                       <span className="font-harry-title text-[#D3A625] text-xl">{index + 1}.</span>
-                      <span className="text-3xl">{CAMPUS_MAP[item.campus]?.icon}</span>
+                      <img src={CAMPUS_MAP[item.campus]?.iconUrl} alt={item.campus} className="w-10 h-10 object-contain drop-shadow-md" />
                       <span className="font-harry-title text-xl tracking-wider text-white">{CAMPUS_MAP[item.campus]?.label}</span>
                     </div>
                     <div className="font-harry-body text-xl font-bold">
@@ -238,7 +237,7 @@ function HouseCard({
   isWinner?: boolean
 }) {
   if (!data) return null;
-  const info = CAMPUS_MAP[data.campus] || { label: data.campus, quote: "Unknown", icon: "🏛️", cssClass: "house-ravenclaw" };
+  const info = CAMPUS_MAP[data.campus] || { label: data.campus, quote: "Unknown", iconUrl: "", cssClass: "house-ravenclaw" };
 
   const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
@@ -252,7 +251,7 @@ function HouseCard({
     >
       <div className="flex flex-col items-center mb-6">
         <span className="text-4xl drop-shadow-lg mb-2">{medals[rank]}</span>
-        <span className="font-harry-title text-5xl mb-4 drop-shadow-2xl">{info.icon}</span>
+        <img src={info.iconUrl} alt={info.label} className="w-24 h-24 object-contain mb-4 drop-shadow-2xl" />
         <h3 className="font-harry-title text-3xl font-bold tracking-wider text-white drop-shadow-md mb-2">
           {info.label}
         </h3>
