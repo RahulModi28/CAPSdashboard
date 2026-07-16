@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, Lock, Eye, CheckCircle2 } from "lucide-react";
+import { Play, Pause, Lock, Eye, CheckCircle2, ShieldAlert } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
 import gryffindorImg from "./assets/harry/gryffindor.png";
@@ -67,12 +67,11 @@ export default function App() {
       // Transition states based on server lock status
       setAppState((current) => {
         if (current === "LOCKED" && isUnlocked) {
-          // Trigger reveal!
-          setTimeout(() => setAppState("LEADERBOARD"), 8000); // Show reveal for 8s
+          setTimeout(() => setAppState("LEADERBOARD"), 8000); 
           return "REVEAL";
         }
-        if (current === "REVEAL") return current; // Keep revealing
-        if (current === "ADMIN") return current; // Don't override admin screen
+        if (current === "REVEAL") return current; 
+        if (current === "ADMIN") return current; 
         return isUnlocked ? "LEADERBOARD" : "LOCKED";
       });
 
@@ -134,7 +133,6 @@ export default function App() {
                data={data} 
                assignments={assignments} 
                loading={loading}
-               onRefresh={fetchData}
              />
           )}
         </AnimatePresence>
@@ -285,18 +283,95 @@ function RevealScreen({ assignments }: { assignments: HouseAssignment }) {
   );
 }
 
-function LeaderboardScreen({ data, assignments, loading, onRefresh }: any) {
+function LeaderboardScreen({ data, assignments, loading }: any) {
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.toLowerCase() === ADMIN_PASSWORD) {
+      setIsAdmin(true);
+      setShowAdminLogin(false);
+    } else {
+      setError(true);
+      setTimeout(() => setError(false), 2000);
+      setPassword("");
+    }
+  };
+
+  const updatePoints = async (campus: string, newPoints: number) => {
+    try {
+      await supabase.from('leaderboard').update({ points: newPoints }).eq('campus', campus);
+    } catch (error) {
+      console.error("Failed to update points:", error);
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full">
-      <header className="text-center mb-6 sm:mb-10 w-full">
+      <header className="text-center mb-6 sm:mb-10 w-full relative">
         <div className="flex justify-between items-center w-full max-w-6xl mx-auto mb-6">
            <a href="https://rahulmodi28.github.io/CAPSdashboard/" className="text-[#D3A625] font-harry-title text-sm tracking-widest cursor-pointer hover:text-white transition-colors">
              ← Back to the landing page
            </a>
-           <button onClick={onRefresh} className="text-[#D3A625] font-harry-title text-sm tracking-widest border border-[#D3A625] px-6 py-2 rounded hover:bg-[#D3A625]/10 transition-colors bg-transparent">
-             REFRESH
-           </button>
+           <div className="flex gap-4">
+             {!isAdmin && (
+               <button onClick={() => setShowAdminLogin(!showAdminLogin)} className="flex items-center gap-2 text-[#D3A625] font-harry-title text-sm tracking-widest border border-[#D3A625] px-4 py-2 rounded hover:bg-[#D3A625]/10 transition-colors bg-transparent">
+                 <ShieldAlert size={16} /> ADMIN
+               </button>
+             )}
+             {isAdmin && (
+               <button onClick={() => setIsAdmin(false)} className="text-red-400 font-harry-title text-sm tracking-widest border border-red-500/50 px-4 py-2 rounded hover:bg-red-500/20 transition-colors bg-transparent">
+                 LOG OUT
+               </button>
+             )}
+           </div>
         </div>
+
+        {/* Mini Admin Login Popup */}
+        <AnimatePresence>
+          {showAdminLogin && !isAdmin && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+              className="absolute top-16 right-0 bg-black/90 p-6 rounded-lg border border-[#D3A625]/50 z-50 shadow-2xl backdrop-blur-md"
+            >
+              <form onSubmit={handleLogin} className="flex flex-col items-center">
+                <input 
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter Password..."
+                  className={`w-full bg-transparent border-b-2 ${error ? 'border-red-500 text-red-400' : 'border-[#D3A625] text-white'} text-center text-xl py-2 mb-4 focus:outline-none focus:border-white transition-colors`}
+                />
+                <button type="submit" className="text-[#D3A625] font-harry-title tracking-widest border border-[#D3A625] px-6 py-2 rounded hover:bg-[#D3A625]/20 transition-all">
+                  Login
+                </button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mini Admin Points Editor */}
+        <AnimatePresence>
+          {isAdmin && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+              className="w-full max-w-4xl mx-auto mb-8 bg-black/60 p-6 rounded-xl border border-[#D3A625]/40 flex flex-wrap justify-center gap-6 backdrop-blur-sm"
+            >
+              {data.map((item: any) => (
+                <div key={item.campus} className="flex items-center gap-4 bg-white/5 p-3 rounded-lg border border-white/10">
+                  <span className="font-harry-title text-2xl text-white w-12 text-center">{item.campus}</span>
+                  <button onClick={() => updatePoints(item.campus, item.points - 10)} className="text-xl font-bold bg-red-900/50 hover:bg-red-800 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">-10</button>
+                  <span className="text-2xl font-bold text-[#D3A625] w-16 text-center">{item.points}</span>
+                  <button onClick={() => updatePoints(item.campus, item.points + 10)} className="text-xl font-bold bg-green-900/50 hover:bg-green-800 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">+10</button>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <span className="font-harry-title text-[#D3A625] tracking-[0.4em] uppercase text-sm mb-2 block">The Great Hall Ledger</span>
         <h1 className="font-harry-title text-4xl sm:text-5xl md:text-6xl font-bold mb-4 gold-glow-text">HOUSE POINTS SCOREBOARD</h1>
         <p className="font-harry-body italic text-white/80 text-base md:text-lg">"Points shall be awarded to the deserving, and taken from those who transgress."</p>
