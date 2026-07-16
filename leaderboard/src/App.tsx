@@ -185,44 +185,13 @@ export default function App() {
         ) : (
           <div className="flex flex-col items-center w-full max-w-6xl gap-16">
             
-            {/* Top 3 Cards Podium */}
-            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-end">
-              
-              {/* Rank 2 (Left) */}
-              <div className="order-2 md:order-1 flex justify-center">
-                <HouseCard rank={2} data={sortedData[1]} />
-              </div>
-              
-              {/* Rank 1 (Center) */}
-              <div className="order-1 md:order-2 flex justify-center scale-100 md:scale-110 z-10 mb-8 md:mb-0">
-                <HouseCard rank={1} data={sortedData[0]} isWinner />
-              </div>
-              
-              {/* Rank 3 (Right) */}
-              <div className="order-3 md:order-3 flex justify-center">
-                <HouseCard rank={3} data={sortedData[2]} />
-              </div>
-              
-            </div>
-
-            {/* Full Standings (4th place and below) */}
-            <div className="w-full max-w-4xl border border-[#D3A625]/40 rounded-xl bg-black/40 backdrop-blur-md p-8 md:p-12">
-              <h2 className="font-harry-title text-[#D3A625] text-2xl text-center tracking-widest uppercase mb-8">Full Standings</h2>
-              
-              <div className="flex flex-col gap-6">
-                {sortedData.map((item, index) => (
-                  <div key={item.campus} className="flex justify-between items-center py-4 border-b border-white/10 last:border-0">
-                    <div className="flex items-center gap-6">
-                      <span className="font-harry-title text-[#D3A625] text-xl">{index + 1}.</span>
-                      <img src={CAMPUS_MAP[item.campus]?.iconUrl} alt={item.campus} className="w-10 h-10 object-contain drop-shadow-md" />
-                      <span className="font-harry-title text-xl tracking-wider text-white">{CAMPUS_MAP[item.campus]?.label}</span>
-                    </div>
-                    <div className="font-harry-body text-xl font-bold">
-                      <AnimatedNumber value={item.points} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* 4 Cards Grid */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8 items-start justify-items-center mt-8">
+              {sortedData.slice(0, 4).map((item, index) => (
+                <div key={item.campus} className="flex justify-center w-full">
+                  <HouseCard rank={index + 1} data={item} isWinner={index === 0} />
+                </div>
+              ))}
             </div>
             
           </div>
@@ -245,15 +214,15 @@ function HouseCard({
   if (!data) return null;
   const info = CAMPUS_MAP[data.campus] || { label: data.campus, quote: "Unknown", iconUrl: "", cssClass: "house-ravenclaw" };
 
-  const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+  const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉", 4: "🏅" };
 
   return (
     <motion.div 
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: rank * 0.1, type: "spring", stiffness: 100, damping: 20 }}
-      className={`hogwarts-card ${info.cssClass} w-full max-w-[320px] p-8 md:p-10 flex flex-col items-center text-center`}
-      style={{ minHeight: isWinner ? '420px' : '380px' }}
+      className={`hogwarts-card ${info.cssClass} w-full max-w-[320px] p-6 lg:p-8 flex flex-col items-center text-center`}
+      style={{ minHeight: isWinner ? '400px' : '360px' }}
     >
       <div className="flex flex-col items-center mb-6">
         <span className="text-4xl drop-shadow-lg mb-2">{medals[rank]}</span>
