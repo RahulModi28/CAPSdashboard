@@ -80,13 +80,20 @@ export default function App() {
           reg: v.reg_no,
           name: v.name,
           campus: v.campus,
-          room: v.room,
+          room: v.room || "",
           partner: v.partner_name,
           keysCollected: v.keys_collected,
           email: v.email,
           hostel: v.hostel || "CHRIST Hall",
           phone: v.phone || "Not Provided"
         }));
+
+        mappedV.sort((a, b) => {
+          const hostelCompare = a.hostel.localeCompare(b.hostel);
+          if (hostelCompare !== 0) return hostelCompare;
+          return a.room.localeCompare(b.room);
+        });
+
         setVolunteers(mappedV);
       }
 
@@ -488,7 +495,6 @@ export default function App() {
                       <tr>
                         <th className="px-6 py-4 font-semibold tracking-wider">Reg ID</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Name</th>
-                        <th className="px-6 py-4 font-semibold tracking-wider">Roommate</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Room</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Status</th>
                       </tr>
@@ -498,7 +504,6 @@ export default function App() {
                         <tr key={v.reg} className="hover:bg-white/50 transition-colors">
                           <td className="px-6 py-4 font-medium text-slate-700">{v.reg}</td>
                           <td className="px-6 py-4 font-medium text-slate-700">{v.name}</td>
-                          <td className="px-6 py-4 font-medium text-slate-700">{v.partner || "-"}</td>
                           <td className="px-6 py-4 font-medium text-slate-700">{v.room}</td>
                           <td className="px-6 py-4 font-medium">
                             {v.keysCollected ? (
@@ -1082,7 +1087,6 @@ export default function App() {
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Hostel</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Campus</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Room</TableHead>
-                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Roommate</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Key Status</TableHead>
                       <TableHead className="h-11 px-6 w-[80px]"></TableHead>
                     </TableRow>
@@ -1127,7 +1131,6 @@ export default function App() {
                               {v.room}
                             </span>
                           </TableCell>
-                          <TableCell className="px-6 py-3.5 text-sm text-muted-foreground">{v.partner}</TableCell>
                           <TableCell className="px-6 py-3.5">
                             {v.keysCollected ? (
                               <span className="text-sm font-semibold text-green-600">Collected</span>
