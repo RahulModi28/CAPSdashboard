@@ -64,7 +64,7 @@ export default function App() {
         // If it's the old script, just assume it's unlocked so it still works
         isUnlocked = true; 
       } else {
-        newScores = json.scores || [];
+        newScores = (json.scores || []).filter((row: any) => row.campus && String(row.campus).trim() !== "");
         isUnlocked = json.isUnlocked === true;
         if (json.assignments) newAssignments = json.assignments;
       }
