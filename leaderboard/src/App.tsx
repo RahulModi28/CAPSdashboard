@@ -327,7 +327,7 @@ function LeaderboardScreen({ data, assignments, loading }: any) {
            <div className="flex gap-4 z-20">
              {!isAdmin && (
                <button onClick={() => setShowAdminLogin(!showAdminLogin)} className="hover:scale-110 transition-transform focus:outline-none">
-                 <img src={sortingHatImg} alt="Admin Access" className="w-10 h-10 object-contain drop-shadow-[0_0_10px_rgba(211,166,37,0.5)]" />
+                 <img src={sortingHatImg} alt="Admin Access" className="w-16 h-16 object-contain drop-shadow-[0_0_15px_rgba(211,166,37,0.6)]" />
                </button>
              )}
              {isAdmin && (
