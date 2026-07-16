@@ -183,6 +183,34 @@ function LockScreen({ onAdminAccess }: { onAdminAccess: () => void }) {
   );
 }
 
+function PointControl({ item }: { item: any }) {
+  const [change, setChange] = useState<number | string>(10);
+  
+  const updatePoints = async (campus: string, newPoints: number) => {
+    try {
+      await supabase.from('leaderboard').update({ points: newPoints }).eq('campus', campus);
+    } catch (error) {
+      console.error("Failed to update points:", error);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3 w-full justify-between mt-2">
+      <span className="text-2xl font-bold text-[#D3A625] w-16 text-center">{item.points} <span className="text-xs text-white/50 block font-normal tracking-widest uppercase">PTS</span></span>
+      <div className="flex items-center gap-2">
+        <button onClick={() => updatePoints(item.campus, item.points - (Number(change) || 0))} className="text-xl font-bold bg-red-900/50 hover:bg-red-800 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-md">-</button>
+        <input 
+          type="number" 
+          value={change} 
+          onChange={(e) => setChange(e.target.value === '' ? '' : Number(e.target.value))} 
+          className="w-16 bg-black border border-[#D3A625] text-white text-center rounded p-2 focus:outline-none" 
+        />
+        <button onClick={() => updatePoints(item.campus, item.points + (Number(change) || 0))} className="text-xl font-bold bg-green-900/50 hover:bg-green-800 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-md">+</button>
+      </div>
+    </div>
+  );
+}
+
 function AdminPanel({ currentAssignments, data, onBroadcast }: { currentAssignments: HouseAssignment, data: any[], onBroadcast: () => void }) {
   const [assignments, setAssignments] = useState<HouseAssignment>(currentAssignments);
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
@@ -207,30 +235,18 @@ function AdminPanel({ currentAssignments, data, onBroadcast }: { currentAssignme
     }
   };
 
-  const updatePoints = async (campus: string, newPoints: number) => {
-    try {
-      await supabase.from('leaderboard').update({ points: newPoints }).eq('campus', campus);
-    } catch (error) {
-      console.error("Failed to update points:", error);
-    }
-  };
-
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full max-w-4xl bg-black/80 p-8 rounded-xl border border-[#D3A625]/50">
-      <h1 className="font-harry-title text-5xl mb-2 gold-glow-text">Admin: Sorting Ceremony</h1>
-      <p className="text-white/70 italic mb-8 text-center">Update points and assign the houses below. When ready, click Broadcast to unlock the screens of everyone in the audience!</p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full max-w-4xl bg-black/80 p-8 rounded-xl border border-[#D3A625]/50 shadow-2xl">
+      <h1 className="font-harry-title text-5xl mb-2 gold-glow-text text-center">Admin: Sorting Ceremony</h1>
+      <p className="text-white/70 italic mb-8 text-center max-w-2xl">Update points and assign the houses below. When ready, click Broadcast to unlock the screens of everyone in the audience!</p>
       
       <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         {data.map(item => (
-          <div key={item.campus} className="flex flex-col items-center bg-white/5 p-4 rounded-lg border border-white/10">
-            <span className="font-harry-title text-4xl text-white mb-2">{item.campus}</span>
-            <div className="flex items-center gap-4 mb-4">
-              <button onClick={() => updatePoints(item.campus, item.points - 10)} className="text-2xl font-bold bg-red-900/50 hover:bg-red-800 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors">-10</button>
-              <span className="text-3xl font-bold text-[#D3A625] w-20 text-center">{item.points}</span>
-              <button onClick={() => updatePoints(item.campus, item.points + 10)} className="text-2xl font-bold bg-green-900/50 hover:bg-green-800 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors">+10</button>
-            </div>
+          <div key={item.campus} className="flex flex-col items-center bg-white/5 p-4 rounded-lg border border-white/10 shadow-inner">
+            <span className="font-harry-title text-4xl text-white mb-2 tracking-widest">{item.campus}</span>
+            <PointControl item={item} />
             <select 
-              className="bg-black border border-[#D3A625] text-[#D3A625] text-xl p-2 rounded focus:outline-none w-full text-center mt-2"
+              className="bg-black border border-[#D3A625] text-[#D3A625] text-xl p-2 rounded focus:outline-none w-full text-center mt-4 tracking-widest font-bold uppercase"
               value={assignments[item.campus] || "Ravenclaw"}
               onChange={(e) => setAssignments({ ...assignments, [item.campus]: e.target.value })}
             >
@@ -245,7 +261,7 @@ function AdminPanel({ currentAssignments, data, onBroadcast }: { currentAssignme
       <button 
         onClick={handleBroadcast}
         disabled={status !== "idle"}
-        className="flex items-center gap-3 bg-[#D3A625] text-black font-harry-title text-2xl px-10 py-4 rounded hover:bg-white transition-all disabled:opacity-50"
+        className="flex items-center gap-3 bg-[#D3A625] text-black font-harry-title text-2xl px-10 py-4 rounded hover:bg-white transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(211,166,37,0.5)]"
       >
         {status === "idle" && <><Eye size={28} /> Broadcast to Great Hall</>}
         {status === "sending" && "Broadcasting..."}
@@ -301,29 +317,21 @@ function LeaderboardScreen({ data, assignments, loading }: any) {
     }
   };
 
-  const updatePoints = async (campus: string, newPoints: number) => {
-    try {
-      await supabase.from('leaderboard').update({ points: newPoints }).eq('campus', campus);
-    } catch (error) {
-      console.error("Failed to update points:", error);
-    }
-  };
-
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full">
       <header className="text-center mb-6 sm:mb-10 w-full relative">
         <div className="flex justify-between items-center w-full max-w-6xl mx-auto mb-6">
-           <a href="https://rahulmodi28.github.io/CAPSdashboard/" className="text-[#D3A625] font-harry-title text-sm tracking-widest cursor-pointer hover:text-white transition-colors">
+           <a href="https://rahulmodi28.github.io/CAPSdashboard/" className="text-[#D3A625] font-harry-title text-sm tracking-widest cursor-pointer hover:text-white transition-colors z-20">
              ← Back to the landing page
            </a>
-           <div className="flex gap-4">
+           <div className="flex gap-4 z-20">
              {!isAdmin && (
-               <button onClick={() => setShowAdminLogin(!showAdminLogin)} className="flex items-center gap-2 text-[#D3A625] font-harry-title text-sm tracking-widest border border-[#D3A625] px-4 py-2 rounded hover:bg-[#D3A625]/10 transition-colors bg-transparent">
+               <button onClick={() => setShowAdminLogin(!showAdminLogin)} className="flex items-center gap-2 text-[#D3A625] font-harry-title text-sm tracking-widest border border-[#D3A625] px-4 py-2 rounded hover:bg-[#D3A625]/10 transition-colors bg-black/50 backdrop-blur-sm">
                  <ShieldAlert size={16} /> ADMIN
                </button>
              )}
              {isAdmin && (
-               <button onClick={() => setIsAdmin(false)} className="text-red-400 font-harry-title text-sm tracking-widest border border-red-500/50 px-4 py-2 rounded hover:bg-red-500/20 transition-colors bg-transparent">
+               <button onClick={() => setIsAdmin(false)} className="text-red-400 font-harry-title text-sm tracking-widest border border-red-500/50 px-4 py-2 rounded hover:bg-red-500/20 transition-colors bg-black/50 backdrop-blur-sm">
                  LOG OUT
                </button>
              )}
@@ -358,23 +366,21 @@ function LeaderboardScreen({ data, assignments, loading }: any) {
           {isAdmin && (
             <motion.div 
               initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-              className="w-full max-w-4xl mx-auto mb-8 bg-black/60 p-6 rounded-xl border border-[#D3A625]/40 flex flex-wrap justify-center gap-6 backdrop-blur-sm"
+              className="w-full max-w-5xl mx-auto mb-8 bg-black/80 p-6 rounded-xl border border-[#D3A625]/40 flex flex-wrap justify-center gap-6 backdrop-blur-md overflow-hidden"
             >
               {data.map((item: any) => (
-                <div key={item.campus} className="flex items-center gap-4 bg-white/5 p-3 rounded-lg border border-white/10">
-                  <span className="font-harry-title text-2xl text-white w-12 text-center">{item.campus}</span>
-                  <button onClick={() => updatePoints(item.campus, item.points - 10)} className="text-xl font-bold bg-red-900/50 hover:bg-red-800 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">-10</button>
-                  <span className="text-2xl font-bold text-[#D3A625] w-16 text-center">{item.points}</span>
-                  <button onClick={() => updatePoints(item.campus, item.points + 10)} className="text-xl font-bold bg-green-900/50 hover:bg-green-800 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">+10</button>
+                <div key={item.campus} className="flex flex-col items-center gap-2 bg-white/5 p-4 rounded-lg border border-white/10 w-full sm:w-[calc(50%-12px)] md:w-[calc(25%-18px)]">
+                  <span className="font-harry-title text-3xl text-white tracking-widest">{item.campus}</span>
+                  <PointControl item={item} />
                 </div>
               ))}
             </motion.div>
           )}
         </AnimatePresence>
 
-        <span className="font-harry-title text-[#D3A625] tracking-[0.4em] uppercase text-sm mb-2 block">The Great Hall Ledger</span>
-        <h1 className="font-harry-title text-4xl sm:text-5xl md:text-6xl font-bold mb-4 gold-glow-text">HOUSE POINTS SCOREBOARD</h1>
-        <p className="font-harry-body italic text-white/80 text-base md:text-lg">"Points shall be awarded to the deserving, and taken from those who transgress."</p>
+        <span className="font-harry-title text-[#D3A625] tracking-[0.4em] uppercase text-sm mb-2 block relative z-10">The Great Hall Ledger</span>
+        <h1 className="font-harry-title text-4xl sm:text-5xl md:text-6xl font-bold mb-4 gold-glow-text relative z-10">HOUSE POINTS SCOREBOARD</h1>
+        <p className="font-harry-body italic text-white/80 text-base md:text-lg relative z-10">"Points shall be awarded to the deserving, and taken from those who transgress."</p>
       </header>
 
       {loading && data.length === 0 ? (
