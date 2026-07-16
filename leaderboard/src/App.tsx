@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+import gryffindorImg from "./assets/harry/gryffindor.png";
+import slytherinImg from "./assets/harry/slytherin.png";
+import ravenclawImg from "./assets/harry/ravenclaw.png";
+import hufflepuffImg from "./assets/harry/hufflepuff.png";
+import sortingHatImg from "./assets/harry/sorting-hat.png";
+
 // --- CONFIGURATION ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxviV3javW-XwcUt80JKY8sDxv4xNTKvDijyL29yGF6n5Wl8no9VXOt-6aUfHLD7thr-Q/exec"; 
 
@@ -13,25 +19,25 @@ const CAMPUS_MAP: Record<string, { label: string; quote: string; iconUrl: string
   BCC: { 
     label: "BCC",
     quote: '"Bold of heart, fierce of will"', 
-    iconUrl: "/harry/gryffindor.png",
+    iconUrl: gryffindorImg,
     cssClass: "house-gryffindor"
   },
   BKC: { 
     label: "BKC", 
     quote: '"Cunning, ambitious, unyielding"',
-    iconUrl: "/harry/slytherin.png",
+    iconUrl: slytherinImg,
     cssClass: "house-slytherin"
   },
   BRC: { 
     label: "BRC", 
     quote: '"Wit beyond measure"',
-    iconUrl: "/harry/ravenclaw.png",
+    iconUrl: ravenclawImg,
     cssClass: "house-ravenclaw"
   },
   BYC: { 
     label: "BYC", 
     quote: '"Just and loyal"',
-    iconUrl: "/harry/hufflepuff.png",
+    iconUrl: hufflepuffImg,
     cssClass: "house-hufflepuff"
   },
 };
@@ -88,7 +94,7 @@ const SortingHatLoader = () => {
           animate={{ rotate: 10, y: -10 }}
           transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
         >
-          <img src="/harry/sorting-hat.png" alt="Sorting Hat" className="w-32 h-32 object-contain drop-shadow-2xl" />
+          <img src={sortingHatImg} alt="Sorting Hat" className="w-32 h-32 object-contain drop-shadow-2xl" />
         </motion.div>
         <motion.div 
           className="text-[#D3A625] font-harry-title text-xl uppercase tracking-widest font-bold"

@@ -105,7 +105,7 @@
       background-color: #040914;
       background-image: 
         radial-gradient(circle at 50% 30%, rgba(20, 30, 60, 0.8) 0%, transparent 60%),
-        url('/harry/hogwarts.jpg');
+        url('./assets/harry/hogwarts.jpg');
       background-size: cover;
       background-position: center;
       background-blend-mode: overlay;
