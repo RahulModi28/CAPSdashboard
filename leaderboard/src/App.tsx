@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Building2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 // --- CONFIGURATION ---
@@ -10,39 +9,33 @@ type CampusData = {
   points: number;
 };
 
-// Map campus abbreviations to their full names, icons, and colors
-const CAMPUS_MAP: Record<string, { label: string; theme: string; icon: React.ReactNode; color: string; gradient: string }> = {
+const CAMPUS_MAP: Record<string, { label: string; quote: string; icon: string; cssClass: string; }> = {
   BCC: { 
-    label: "Central Campus",
-    theme: "Downtown / Arts", 
-    icon: <span className="font-display-lg text-2xl font-bold tracking-wider">BCC</span>,
-    color: "#2957A4",
-    gradient: "from-[#2957A4] to-[#4070C5]"
+    label: "BCC",
+    quote: '"Bold of heart, fierce of will"', 
+    icon: "🦁",
+    cssClass: "house-gryffindor"
   },
   BKC: { 
-    label: "Kengeri Campus", 
-    theme: "Tech / Innovation",
-    icon: <span className="font-display-lg text-2xl font-bold tracking-wider">BKC</span>,
-    color: "#D2AE6D",
-    gradient: "from-[#D2AE6D] to-[#E5C383]"
+    label: "BKC", 
+    quote: '"Cunning, ambitious, unyielding"',
+    icon: "🐍",
+    cssClass: "house-slytherin"
   },
   BRC: { 
-    label: "Bannerghatta Campus", 
-    theme: "Medical / Science",
-    icon: <span className="font-display-lg text-2xl font-bold tracking-wider">BRC</span>,
-    color: "#1A3A70",
-    gradient: "from-[#1A3A70] to-[#2957A4]"
+    label: "BRC", 
+    quote: '"Wit beyond measure"',
+    icon: "🦅",
+    cssClass: "house-ravenclaw"
   },
   BYC: { 
-    label: "Yeshwanthpur Campus", 
-    theme: "North / Nature",
-    icon: <span className="font-display-lg text-2xl font-bold tracking-wider">BYC</span>,
-    color: "#B39155",
-    gradient: "from-[#B39155] to-[#D2AE6D]"
+    label: "BYC", 
+    quote: '"Just and loyal"',
+    icon: "🦡",
+    cssClass: "house-hufflepuff"
   },
 };
 
-// Animated Number Component
 const AnimatedNumber = ({ value }: { value: number }) => {
   const [displayValue, setDisplayValue] = useState(0);
 
@@ -71,8 +64,8 @@ const AnimatedNumber = ({ value }: { value: number }) => {
   return (
     <motion.span 
       key={value}
-      initial={{ scale: 1.1, color: "hsl(var(--foreground))" }}
-      animate={{ scale: 1, color: "currentColor" }}
+      initial={{ scale: 1.1 }}
+      animate={{ scale: 1 }}
       transition={{ duration: 0.5 }}
       className="inline-block"
     >
@@ -81,50 +74,30 @@ const AnimatedNumber = ({ value }: { value: number }) => {
   );
 };
 
-// Spark of Knowledge Loading Animation
-const SparkOfKnowledgeLoader = () => {
+const SortingHatLoader = () => {
   return (
     <div className="flex items-center justify-center flex-1 w-full relative">
       <motion.div
         initial={{ opacity: 1 }}
         animate={{ opacity: 0 }}
         transition={{ delay: 2.2, duration: 0.3 }}
-        className="relative w-full h-full flex items-center justify-center"
+        className="relative w-full h-full flex flex-col items-center justify-center gap-6"
       >
-        <motion.div
-          className="absolute w-4 h-4 rounded-full bg-[#D2AE6D] shadow-[0_0_20px_8px_rgba(210,174,109,0.4)] z-20"
-          initial={{ x: -200, y: 150, scale: 0, opacity: 0 }}
-          animate={{ x: [-200, -50, 0], y: [150, -50, 0], scale: [0, 1.5, 1], opacity: [0, 1, 1] }}
-          transition={{ duration: 1.2, ease: "easeOut", times: [0, 0.7, 1] }}
-        />
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 rounded-full bg-[#2957A4] shadow-[0_0_10px_2px_rgba(41,87,164,0.5)]"
-              initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
-              animate={{ x: Math.cos((i * 45 * Math.PI) / 180) * 100, y: Math.sin((i * 45 * Math.PI) / 180) * 100, opacity: [0, 1, 0], scale: [0, 1, 0] }}
-              transition={{ delay: 1.1, duration: 1.2, ease: "easeOut" }}
-            />
-          ))}
-          {[...Array(4)].map((_, i) => (
-            <motion.div
-              key={`line-${i}`}
-              className="absolute h-[1px] bg-gradient-to-r from-[#D2AE6D] to-[#2957A4] origin-left"
-              style={{ rotate: `${i * 90 + 45}deg` }}
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 100, opacity: [0, 0.5, 0] }}
-              transition={{ delay: 1.1, duration: 1, ease: "easeOut" }}
-            />
-          ))}
-        </div>
         <motion.div 
-          className="absolute mt-32 text-[#D2AE6D] font-mono text-sm uppercase tracking-[0.3em] font-bold"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: [0, 1, 0], y: [10, 0, 0] }}
-          transition={{ delay: 0.5, duration: 1.8 }}
+          className="text-6xl"
+          initial={{ rotate: -10, y: 0 }}
+          animate={{ rotate: 10, y: -10 }}
+          transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
         >
-          Igniting Knowledge...
+          🎩
+        </motion.div>
+        <motion.div 
+          className="text-[#D3A625] font-harry-title text-xl uppercase tracking-widest font-bold"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        >
+          Consulting the Ledger...
         </motion.div>
       </motion.div>
     </div>
@@ -179,115 +152,123 @@ export default function App() {
   const sortedData = [...data].sort((a, b) => b.points - a.points);
   
   if (sortedData.length < 4 && !loading) {
-     return <div className="p-8 text-center text-xl text-white">Not enough campus data available...</div>
+     return <div className="p-8 text-center text-xl text-white font-harry-body">Not enough campus data available...</div>
   }
 
   return (
-    <div className="font-body-md antialiased h-screen flex flex-col items-center bg-[#010e24] overflow-hidden selection:bg-primary/30">
+    <div className="font-harry-body antialiased min-h-screen flex flex-col items-center hp-bg overflow-auto selection:bg-[#D3A625]/30 text-white pb-12">
       
-      {/* Deep Void Background */}
-      <div className="fixed inset-0 z-0 bg-[#010e24]">
-        <div className="absolute inset-0" style={{ background: "radial-gradient(circle at 50% 40%, rgba(41, 87, 164, 0.15) 0%, transparent 70%)" }}></div>
-        <div className="absolute top-0 left-0 w-full h-full opacity-30 pointer-events-none" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/stardust.png')" }}></div>
-      </div>
-
-      <main className="relative z-10 w-full h-full max-w-[1440px] px-container-padding-desktop flex flex-col items-center justify-center py-4 sm:py-8">
+      <main className="relative z-10 w-full h-full max-w-[1440px] px-8 sm:px-12 flex flex-col items-center justify-start py-8 sm:py-16">
         
-        {/* Minimal Header */}
-        <header className="text-center mb-6 sm:mb-10">
-          <h1 className="font-display-lg text-display-lg text-white mb-2">Scoreboard of Leadership Team Camp</h1>
+        {/* Header */}
+        <header className="text-center mb-12 sm:mb-20 w-full">
+          <div className="flex justify-between items-center w-full max-w-6xl mx-auto mb-12">
+             <div className="text-[#D3A625] font-harry-title text-sm tracking-widest cursor-pointer hover:text-white transition-colors">
+               ← Back to the Sorting Ceremony
+             </div>
+             <button onClick={fetchData} className="text-[#D3A625] font-harry-title text-sm tracking-widest border border-[#D3A625] px-6 py-2 rounded hover:bg-[#D3A625]/10 transition-colors bg-transparent">
+               REFRESH
+             </button>
+          </div>
+          <span className="font-harry-title text-[#D3A625] tracking-[0.4em] uppercase text-sm mb-4 block">The Great Hall Ledger</span>
+          <h1 className="font-harry-title text-4xl sm:text-6xl md:text-7xl font-bold mb-6 gold-glow-text">HOUSE POINTS SCOREBOARD</h1>
+          <p className="font-harry-body italic text-white/80 text-lg md:text-xl">"Points shall be awarded to the deserving, and taken from those who transgress."</p>
         </header>
 
         {loading && data.length === 0 ? (
-          <SparkOfKnowledgeLoader />
+          <SortingHatLoader />
         ) : (
-          <>
-            {/* Dynamic Bar Chart Podium */}
-            <div className="w-full max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 items-end mb-8 sm:mb-12">
-              {sortedData.slice(0, 4).map((item, index) => (
-                <PodiumColumn
-                  key={item.campus}
-                  rank={index + 1}
-                  data={item}
-                  maxPoints={sortedData[0].points}
-                  delay={0.1 * index}
-                />
-              ))}
+          <div className="flex flex-col items-center w-full max-w-6xl gap-16">
+            
+            {/* Top 3 Cards Podium */}
+            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-end">
+              
+              {/* Rank 2 (Left) */}
+              <div className="order-2 md:order-1 flex justify-center">
+                <HouseCard rank={2} data={sortedData[1]} />
+              </div>
+              
+              {/* Rank 1 (Center) */}
+              <div className="order-1 md:order-2 flex justify-center scale-100 md:scale-110 z-10 mb-8 md:mb-0">
+                <HouseCard rank={1} data={sortedData[0]} isWinner />
+              </div>
+              
+              {/* Rank 3 (Right) */}
+              <div className="order-3 md:order-3 flex justify-center">
+                <HouseCard rank={3} data={sortedData[2]} />
+              </div>
+              
             </div>
-          </>
+
+            {/* Full Standings (4th place and below) */}
+            <div className="w-full max-w-4xl border border-[#D3A625]/40 rounded-xl bg-black/40 backdrop-blur-md p-8 md:p-12">
+              <h2 className="font-harry-title text-[#D3A625] text-2xl text-center tracking-widest uppercase mb-8">Full Standings</h2>
+              
+              <div className="flex flex-col gap-6">
+                {sortedData.map((item, index) => (
+                  <div key={item.campus} className="flex justify-between items-center py-4 border-b border-white/10 last:border-0">
+                    <div className="flex items-center gap-6">
+                      <span className="font-harry-title text-[#D3A625] text-xl">{index + 1}.</span>
+                      <span className="text-3xl">{CAMPUS_MAP[item.campus]?.icon}</span>
+                      <span className="font-harry-title text-xl tracking-wider text-white">{CAMPUS_MAP[item.campus]?.label}</span>
+                    </div>
+                    <div className="font-harry-body text-xl font-bold">
+                      <AnimatedNumber value={item.points} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+          </div>
         )}
-
       </main>
-
-
     </div>
   );
 }
 
-// Podium Column Component
-function PodiumColumn({ 
+// House Card Component
+function HouseCard({ 
   rank, 
-  data, 
-  maxPoints,
-  delay
+  data,
+  isWinner = false
 }: { 
   rank: number, 
   data: CampusData, 
-  maxPoints: number,
-  delay: number
+  isWinner?: boolean
 }) {
   if (!data) return null;
-  const info = CAMPUS_MAP[data.campus] || { label: data.campus, theme: "Unknown", icon: <Building2 className="w-10 h-10" />, color: "hsl(var(--primary))", gradient: "from-primary to-primary/50" };
+  const info = CAMPUS_MAP[data.campus] || { label: data.campus, quote: "Unknown", icon: "🏛️", cssClass: "house-ravenclaw" };
 
-  const isCenter = rank === 1;
-  const heightRatio = maxPoints > 0 ? data.points / maxPoints : 0;
-  // Dynamic height between 140px and 360px based on points relative to the winner
-  const barHeight = Math.max(140, heightRatio * 360);
-  const beamClass = rank === 1 ? "gold-beam" : "blue-beam";
-  const glowTopClass = rank === 1 ? "gold-glow-top" : "";
-  const animationDelay = `${rank * 0.5}s`;
+  const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
   return (
     <motion.div 
-      layout
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, type: "spring", stiffness: 100, damping: 20 }}
-      className={`flex flex-col items-center`}
+      transition={{ delay: rank * 0.1, type: "spring", stiffness: 100, damping: 20 }}
+      className={`hogwarts-card ${info.cssClass} w-full max-w-[320px] p-8 md:p-10 flex flex-col items-center text-center`}
+      style={{ minHeight: isWinner ? '420px' : '380px' }}
     >
-      <div className={`mb-${isCenter ? '10' : '8'} flex flex-col items-center text-center`}>
-        <div className={`w-${isCenter ? '28 h-28' : '20 h-20'} rounded-full border border-primary/20 p-2 sm:p-4 mb-${isCenter ? '6' : '4'} relative bg-white/5 flex items-center justify-center text-white backdrop-blur-md transition-all duration-500`}>
-          {info.icon}
-          {isCenter && (
-            <div className="absolute -top-3 -right-3 w-10 h-10 bg-secondary rounded-full flex items-center justify-center shadow-2xl border border-white/20">
-              <span className="material-symbols-outlined text-on-secondary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
-            </div>
-          )}
-        </div>
-        <h3 className={`${isCenter ? 'font-headline-lg text-headline-lg text-white' : 'font-headline-md text-headline-md text-white/90'} transition-all duration-500`}>
-          {info.label.replace(" Campus", "")}
+      <div className="flex flex-col items-center mb-6">
+        <span className="text-4xl drop-shadow-lg mb-2">{medals[rank]}</span>
+        <span className="font-harry-title text-5xl mb-4 drop-shadow-2xl">{info.icon}</span>
+        <h3 className="font-harry-title text-3xl font-bold tracking-wider text-white drop-shadow-md mb-2">
+          {info.label}
         </h3>
+        <p className="font-harry-body italic text-white/90 text-sm opacity-90 px-4">
+          {info.quote}
+        </p>
       </div>
 
-      <motion.div 
-        className={`holographic-pillar ${beamClass} w-full rounded-t-xl flex flex-col items-center pt-8 overflow-hidden`}
-        initial={{ height: 100 }}
-        animate={{ height: barHeight }}
-        transition={{ type: "spring", stiffness: 50, damping: 15 }}
-      >
-        <div className={`pillar-glow-top ${glowTopClass}`}></div>
-        <div className="light-stream" style={{ animationDelay }}></div>
-        <span className={`font-display-lg ${isCenter ? 'text-display-lg text-secondary/30 mb-4' : 'text-headline-lg text-white/20 mb-2'}`}>
-          {rank}{rank === 1 ? 'st' : rank === 2 ? 'nd' : rank === 3 ? 'rd' : 'th'}
-        </span>
-        <div className={`text-white ${isCenter ? 'font-display-lg text-display-lg drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'font-headline-lg text-headline-lg tracking-tight'}`}>
+      <div className="mt-auto flex flex-col items-center">
+        <div className="font-harry-title text-5xl font-bold text-white tracking-wider drop-shadow-lg mb-2">
           <AnimatedNumber value={data.points} />
         </div>
-        <div className={`${isCenter ? 'text-secondary/60 font-label-md text-label-md mt-2' : 'text-white/40 font-label-sm text-label-sm mt-1'} uppercase ${isCenter ? 'tracking-widest' : 'tracking-tighter'}`}>
-          {isCenter ? 'Points' : 'Pts'}
+        <div className="font-harry-title text-xs uppercase tracking-[0.3em] text-white/70">
+          Points
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
-

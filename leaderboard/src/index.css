@@ -59,72 +59,60 @@
 }
 
 @layer utilities {
-  .holographic-pillar {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
+  .hogwarts-card {
       position: relative;
       overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hogwarts-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px -5px rgba(0, 0, 0, 0.9);
   }
 
-  .holographic-pillar::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 1px;
-      height: 100%;
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), transparent);
-      transform: translateX(-50%);
+  .house-gryffindor {
+      background: linear-gradient(135deg, #740001 0%, #530001 100%);
+      border: 2px solid #D3A625;
+      box-shadow: 0 0 20px rgba(211, 166, 37, 0.2);
   }
 
-  .gold-beam {
-      background: linear-gradient(180deg, rgba(231, 193, 126, 0.2) 0%, rgba(231, 193, 126, 0.05) 100%);
-      box-shadow: 0 0 40px rgba(231, 193, 126, 0.1);
-      border-color: rgba(231, 193, 126, 0.3);
+  .house-slytherin {
+      background: linear-gradient(135deg, #1A472A 0%, #0d2616 100%);
+      border: 2px solid #aaaaaa;
+      box-shadow: 0 0 20px rgba(170, 170, 170, 0.2);
   }
 
-  .blue-beam {
-      background: linear-gradient(180deg, rgba(173, 198, 255, 0.15) 0%, rgba(173, 198, 255, 0.03) 100%);
-      box-shadow: 0 0 30px rgba(173, 198, 255, 0.05);
-      border-color: rgba(173, 198, 255, 0.2);
+  .house-ravenclaw {
+      background: linear-gradient(135deg, #0e1a40 0%, #060b1c 100%);
+      border: 2px solid #946b2d;
+      box-shadow: 0 0 20px rgba(148, 107, 45, 0.2);
   }
 
-  .pillar-glow-top {
-      position: absolute;
-      top: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 120%;
-      height: 20px;
-      background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-      filter: blur(5px);
+  .house-hufflepuff {
+      background: linear-gradient(135deg, #eebb28 0%, #c49615 100%);
+      border: 2px solid #000000;
+      color: #000000;
   }
 
-  .gold-glow-top {
-      background: radial-gradient(ellipse at center, rgba(231, 193, 126, 0.6) 0%, transparent 70%);
+  .gold-glow-text {
+      color: #D3A625;
+      text-shadow: 0 0 10px rgba(211, 166, 37, 0.6), 0 0 20px rgba(211, 166, 37, 0.4);
   }
 
-  .light-stream {
-      position: absolute;
-      width: 200%;
-      height: 20px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-      transform: rotate(-45deg);
-      animation: move-stream 5s linear infinite;
-  }
-
-  .challenger-pulse {
-      animation: pulse-soft 3s ease-in-out infinite;
+  .hp-bg {
+      background-color: #040914;
+      background-image: 
+        radial-gradient(circle at 50% 30%, rgba(20, 30, 60, 0.8) 0%, transparent 60%),
+        url('https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2094&auto=format&fit=crop'); /* A dark night sky/moon placeholder */
+      background-size: cover;
+      background-position: center;
+      background-blend-mode: overlay;
   }
 }
 
-@keyframes pulse-soft {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.005); }
-}
-
-@keyframes move-stream {
-  0% { top: -100%; left: -100%; }
-  100% { top: 200%; left: 200%; }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }

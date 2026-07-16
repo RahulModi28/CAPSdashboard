@@ -26,7 +26,9 @@ module.exports = {
         "headline-lg-mobile": ["Hanken Grotesk"],
         "body-md": ["Inter"],
         "label-sm": ["JetBrains Mono"],
-        "headline-md": ["Hanken Grotesk"]
+        "headline-md": ["Hanken Grotesk"],
+        "harry-title": ["Cinzel", "serif"],
+        "harry-body": ["Playfair Display", "serif"]
       },
       fontSize: {
         "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
