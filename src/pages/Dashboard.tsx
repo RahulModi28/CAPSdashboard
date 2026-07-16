@@ -33,7 +33,7 @@ import {
   ArcElement
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
-import logo from "./assets/logo.png";
+import logo from "../assets/logo.png";
 
 ChartJS.register(
   CategoryScale,
@@ -467,7 +467,6 @@ export default function App() {
                       <tr>
                         <th className="px-6 py-4 font-semibold tracking-wider">Reg ID</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Name</th>
-                        <th className="px-6 py-4 font-semibold tracking-wider">Hostel</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Roommate</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Room</th>
                         <th className="px-6 py-4 font-semibold tracking-wider">Status</th>
@@ -478,7 +477,6 @@ export default function App() {
                         <tr key={v.reg} className="hover:bg-white/50 transition-colors">
                           <td className="px-6 py-4 font-medium text-slate-700">{v.reg}</td>
                           <td className="px-6 py-4 font-medium text-slate-700">{v.name}</td>
-                          <td className="px-6 py-4 font-medium text-slate-700">{v.hostel}</td>
                           <td className="px-6 py-4 font-medium text-slate-700">{v.partner || "-"}</td>
                           <td className="px-6 py-4 font-medium text-slate-700">{v.room}</td>
                           <td className="px-6 py-4 font-medium">
@@ -1060,6 +1058,7 @@ export default function App() {
                     <TableRow className="bg-muted/30 hover:bg-muted/30 border-b-border/50">
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Registration</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Volunteer Name</TableHead>
+                      <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Hostel</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Campus</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Room</TableHead>
                       <TableHead className="h-11 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Roommate</TableHead>
@@ -1100,6 +1099,7 @@ export default function App() {
                               <span className="font-semibold text-sm text-foreground">{v.name}</span>
                             </div>
                           </TableCell>
+                          <TableCell className="px-6 py-3.5 text-sm text-muted-foreground">{v.hostel}</TableCell>
                           <TableCell className="px-6 py-3.5 text-sm text-muted-foreground">{v.campus}</TableCell>
                           <TableCell className="px-6 py-3.5">
                             <span className="font-mono text-xs font-medium text-muted-foreground">
