@@ -121,6 +121,27 @@ export default function App() {
     }
     
     fetchData();
+
+    const channel = supabase
+      .channel('volunteers-changes')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'volunteers' }, (payload) => {
+        setVolunteers((prev) => {
+          const updated = [...prev];
+          const index = updated.findIndex((v) => v.reg === payload.new.reg_no);
+          if (index !== -1) {
+            updated[index] = {
+              ...updated[index],
+              keysCollected: payload.new.keys_collected
+            };
+          }
+          return updated;
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
   const [emailFilter, setEmailFilter] = useState<{ type: 'all' | 'status' | 'hour', value: string }>({ type: 'all', value: '' });
   const [now, setNow] = useState(new Date());
