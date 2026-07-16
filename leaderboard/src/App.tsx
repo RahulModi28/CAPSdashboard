@@ -186,9 +186,9 @@ export default function App() {
           <div className="flex flex-col items-center w-full max-w-6xl gap-16">
             
             {/* 4 Cards Grid */}
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8 items-start justify-items-center mt-8">
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8 items-stretch justify-items-center mt-8">
               {sortedData.slice(0, 4).map((item, index) => (
-                <div key={item.campus} className="flex justify-center w-full">
+                <div key={item.campus} className="flex justify-center w-full h-full">
                   <HouseCard rank={index + 1} data={item} isWinner={index === 0} />
                 </div>
               ))}
@@ -221,8 +221,7 @@ function HouseCard({
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: rank * 0.1, type: "spring", stiffness: 100, damping: 20 }}
-      className={`hogwarts-card ${info.cssClass} w-full max-w-[320px] p-6 lg:p-8 flex flex-col items-center text-center`}
-      style={{ minHeight: isWinner ? '400px' : '360px' }}
+      className={`hogwarts-card ${info.cssClass} w-full h-full max-w-[320px] p-6 lg:p-8 flex flex-col items-center text-center`}
     >
       <div className="flex flex-col items-center mb-6">
         <span className="text-4xl drop-shadow-lg mb-2">{medals[rank]}</span>
