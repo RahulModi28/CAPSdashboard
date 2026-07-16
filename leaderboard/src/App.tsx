@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, Lock, Eye, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Play, Pause, Lock, Eye, CheckCircle2 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
 import gryffindorImg from "./assets/harry/gryffindor.png";
@@ -326,8 +326,8 @@ function LeaderboardScreen({ data, assignments, loading }: any) {
            </a>
            <div className="flex gap-4 z-20">
              {!isAdmin && (
-               <button onClick={() => setShowAdminLogin(!showAdminLogin)} className="flex items-center gap-2 text-[#D3A625] font-harry-title text-sm tracking-widest border border-[#D3A625] px-4 py-2 rounded hover:bg-[#D3A625]/10 transition-colors bg-black/50 backdrop-blur-sm">
-                 <ShieldAlert size={16} /> ADMIN
+               <button onClick={() => setShowAdminLogin(!showAdminLogin)} className="hover:scale-110 transition-transform focus:outline-none">
+                 <img src={sortingHatImg} alt="Admin Access" className="w-10 h-10 object-contain drop-shadow-[0_0_10px_rgba(211,166,37,0.5)]" />
                </button>
              )}
              {isAdmin && (
